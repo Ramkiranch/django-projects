@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <title>Ramkiran's Blog</title>
+  </head>
+  <body>
+
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'home' %}">Ramkiran's Blog</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mynav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+
+        <div class="collapse navbar-collapse" id="mynav">
+          <ul class="navbar-nav mr-auto">
+          <li><a class="nav-link" href="{% url 'about' %}">About</a></li>
+          <li><a class="nav-link" href="http://facebook.com/ramkiran007" target="_blank">Facebook</a></li>
+          <li><a class="nav-link" href="http://ramkiranchevendra.site" target="_blank">website</a></li>
+          <li><a class="nav-link" href="http://twitter.com/kinnu007" target="_blank">Twitter</a></li>
+          </ul>
+        </div>
+
+    </nav>
+    <div class="container">
+      <h2 class="text-center">About the blog</h2>
+
+      <img src="{% static 'sitepages/about.jpg' %}" class="img-responsive center-block" style="max-height:300px;"/>
+      <br />
+      <p>I am Venkata Ramkiran Chevendra, a second year Masters Student at University of Illinois at Chicago. I am enthusiastic in web development and always interested in learning new technologies. This blog reflects my views and opinions on the technologies I use and the new technologies in the market. There is also some cool and fun stuff in this blog too.I like football aka soccer. You can find some of the posts related to football too.</p>
+    </div>
+  </body>
+  </html>

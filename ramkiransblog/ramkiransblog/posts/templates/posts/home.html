@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <title>Ramkiran's Blog</title>
+  </head>
+  <body>
+
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'home' %}">Ramkiran's Blog</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mynav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+
+        <div class="collapse navbar-collapse" id="mynav">
+          <ul class="navbar-nav mr-auto">
+          <li><a class="nav-link" href="{% url 'about' %}">About</a></li>
+          <li><a class="nav-link" href="http://facebook.com/ramkiran007" target="_blank">Facebook</a></li>
+          <li><a class="nav-link" href="http://ramkiranchevendra.site" target="_blank">website</a></li>
+          <li><a class="nav-link" href="http://twitter.com/kinnu007" target="_blank">Twitter</a></li>
+          </ul>
+        </div>
+
+    </nav>
+    <div class="container">
+      <h1 class="text-center">Welcome to Ramkiran's blog!</h1>
+
+      <img src="{% static 'posts/home.jpg' %}" class="img-responsive center-block" style="max-height:300px;"/>
+
+      <h2>Latest Posts</h2>
+      <hr />
+
+      {% for post in posts.all %}
+
+      <a href="{% url 'post_detail' post.id %}"><h3>{{post.title}}</h3></a>
+
+       <h4><span class="glyphicon glyphicon-time"></span> {{post.pub_date_modified}}</h4>
+
+      <img src = "{{post.image.url}}" class="img-responsive center-block" style="max-height:150px;"/>
+      <br />
+      <p>{{post.summary}}</p>
+      <br />
+      <br />
+
+      {% endfor %}
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>

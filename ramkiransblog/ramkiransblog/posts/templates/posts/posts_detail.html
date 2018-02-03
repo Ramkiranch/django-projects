@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  </head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="{% url 'home' %}">Ramkiran's Blog</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mynav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+
+
+    <div class="collapse navbar-collapse" id="mynav">
+      <ul class="navbar-nav mr-auto">
+      <li><a class="nav-link" href="{% url 'about' %}">About</a></li>
+      <li><a class="nav-link" href="http://facebook.com/ramkiran007" target="_blank">Facebook</a></li>
+      <li><a class="nav-link" href="http://ramkiranchevendra.site" target="_blank">website</a></li>
+      <li><a class="nav-link" href="http://twitter.com/kinnu007" target="_blank">Twitter</a></li>
+      </ul>
+    </div>
+
+</nav>
+<div class="container">
+<h2 class="text-center">{{post.title}}</h2>
+<br />
+<h4 class="text-center"><span class="glyphicon glyphicon-time"></span> {{post.pub_date_modified}}</h4>
+<br />
+<img src = "{{post.image.url}}" class="img-responsive center-block" style="max-height:300px;"/>
+<br />
+<p>{{post.body}}</p>
+<br />
+<br />
+
+<div id="disqus_thread"></div>
+<script>
+
+
+var disqus_config = function () {
+this.page.identifier = 'post-{{ post.id }}'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://ramkiransblog.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</body>
+</html>
