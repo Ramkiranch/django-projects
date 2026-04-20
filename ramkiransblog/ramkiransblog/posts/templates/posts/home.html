@@ -1,63 +1,78 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 {% load static %}
-<html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+{% block title %}Ramkiran's Blog — Latest Posts{% endblock %}
 
-    <title>Ramkiran's Blog</title>
-  </head>
-  <body>
+{% block content %}
+  <section class="hero">
+    <h1>Welcome to Ramkiran's Blog</h1>
+    <img src="{% static 'posts/home.jpg' %}" alt="Ramkiran's blog hero">
+  </section>
 
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="{% url 'home' %}">Ramkiran's Blog</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mynav" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-
-
-        <div class="collapse navbar-collapse" id="mynav">
-          <ul class="navbar-nav mr-auto">
-          <li><a class="nav-link" href="{% url 'about' %}">About</a></li>
-          <li><a class="nav-link" href="http://facebook.com/ramkiran007" target="_blank">Facebook</a></li>
-          <li><a class="nav-link" href="http://ramkiranchevendra.site" target="_blank">website</a></li>
-          <li><a class="nav-link" href="http://twitter.com/kinnu007" target="_blank">Twitter</a></li>
-          </ul>
-        </div>
-
-    </nav>
-    <div class="container">
-      <h1 class="text-center">Welcome to Ramkiran's blog!</h1>
-
-      <img src="{% static 'posts/home.jpg' %}" class="img-responsive center-block" style="max-height:300px;"/>
-
-      <h2>Latest Posts</h2>
-      <hr />
-
-      {% for post in posts.all %}
-
-      <a href="{% url 'post_detail' post.id %}"><h3>{{post.title}}</h3></a>
-
-       <h4><span class="glyphicon glyphicon-time"></span> {{post.pub_date_modified}}</h4>
-
-      <img src = "{{post.image.url}}" class="img-responsive center-block" style="max-height:150px;"/>
-      <br />
-      <p>{{post.summary}}</p>
-      <br />
-      <br />
-
-      {% endfor %}
+  <section>
+    <div class="d-flex align-items-baseline justify-content-between mb-4">
+      <h2 class="mb-0">Latest posts</h2>
+      {% if page_obj.paginator.count %}
+        <span class="text-muted small">
+          {{ page_obj.paginator.count }} post{{ page_obj.paginator.count|pluralize }}
+        </span>
+      {% endif %}
     </div>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-  </body>
-</html>
+
+    {% if page_obj %}
+      <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for post in page_obj %}
+          <div class="col">
+            <article class="card post-card h-100">
+              <a href="{% url 'post_detail' post.id %}" aria-label="{{ post.title }}">
+                <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+              </a>
+              <div class="card-body d-flex flex-column">
+                <h3 class="h5 card-title">
+                  <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+                </h3>
+                <p class="text-muted small mb-2">{{ post.pub_date_modified }}</p>
+                <p class="card-text">{{ post.summary }}&hellip;</p>
+                <a href="{% url 'post_detail' post.id %}" class="mt-auto small text-decoration-none">
+                  Read more &rarr;
+                </a>
+              </div>
+            </article>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No posts yet — check back soon.</p>
+    {% endif %}
+
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav aria-label="Posts pagination" class="mt-5">
+        <ul class="pagination justify-content-center">
+          <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+            <a class="page-link"
+               href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% else %}#{% endif %}"
+               aria-label="Previous">&laquo;</a>
+          </li>
+
+          {% for num in elided_range %}
+            {% if num == page_obj.paginator.ELLIPSIS %}
+              <li class="page-item disabled"><span class="page-link">{{ num }}</span></li>
+            {% elif num == page_obj.number %}
+              <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ num }}</span>
+              </li>
+            {% else %}
+              <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+
+          <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% else %}#{% endif %}"
+               aria-label="Next">&raquo;</a>
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
+  </section>
+{% endblock %}
