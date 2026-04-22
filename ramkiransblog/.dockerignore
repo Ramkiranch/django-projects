@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Django dev artifacts
+db.sqlite3
+db.sqlite3-journal
+ramkiransblog/staticfiles/
+
+# Git / docs / tooling
+.git/
+.gitignore
+*.md
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker meta (not needed inside the image)
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
