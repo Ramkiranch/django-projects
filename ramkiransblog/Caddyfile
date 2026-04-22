@@ -13,6 +13,16 @@
 {$DOMAIN} {
 	encode gzip zstd
 
+	# Serve user-uploaded media directly from the shared volume so image
+	# requests don't wake a gunicorn worker. The media_data volume is
+	# mounted read-only into this container (see docker-compose.yml) —
+	# Django writes uploads in the `web` container; Caddy only reads.
+	handle_path /media/* {
+		root * /srv/media
+		file_server
+		header Cache-Control "public, max-age=604800"
+	}
+
 	reverse_proxy web:8000 {
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-For {remote_host}
