@@ -18,9 +18,10 @@
       {{ post.body|linebreaks }}
     </div>
 
-    {# Comments disabled — Disqus was surfacing stale threads from the old blog.
-       To re-enable, restore the <section aria-label="Comments">...</section>
-       block and the {% block extra_js %} Disqus loader from git history
-       (commit bb7b733 or any commit before the "disable disqus" change). #}
+    {% comment %}
+      Comments disabled — Disqus was surfacing stale threads from the old blog.
+      To re-enable, restore the Comments section and the extra_js Disqus
+      loader from git history (commit 73deefc introduced the removal; revert it).
+    {% endcomment %}
   </article>
 {% endblock %}
