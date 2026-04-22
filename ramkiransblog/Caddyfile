@@ -1,0 +1,26 @@
+# Caddy reverse proxy for ramkiransblog
+#
+# Caddy handles TLS termination (auto Let's Encrypt via ACME) and forwards
+# requests to the `web` service on the internal compose network. Django
+# itself emits HSTS / secure-cookie headers when DEBUG=False; Caddy only
+# needs to forward the correct X-Forwarded-Proto so Django trusts the TLS
+# state (see SECURE_PROXY_SSL_HEADER in settings.py).
+
+{
+	email venkata_ramkiran@yahoo.com
+}
+
+{$DOMAIN} {
+	encode gzip zstd
+
+	reverse_proxy web:8000 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-For {remote_host}
+		header_up Host {host}
+		transport http {
+			read_timeout  60s
+			write_timeout 60s
+			dial_timeout  5s
+		}
+	}
+}
