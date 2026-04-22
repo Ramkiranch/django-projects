@@ -18,46 +18,9 @@
       {{ post.body|linebreaks }}
     </div>
 
-    <hr class="my-5">
-
-    <section aria-label="Comments">
-      <h2 class="h4 mb-3">Comments</h2>
-      <div id="disqus_thread"></div>
-      <noscript>Please enable JavaScript to view the
-        <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
-      </noscript>
-    </section>
+    {# Comments disabled — Disqus was surfacing stale threads from the old blog.
+       To re-enable, restore the <section aria-label="Comments">...</section>
+       block and the {% block extra_js %} Disqus loader from git history
+       (commit bb7b733 or any commit before the "disable disqus" change). #}
   </article>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  // Lazy-load Disqus only when the comments thread scrolls into view.
-  (function () {
-    var target = document.getElementById('disqus_thread');
-    if (!target) return;
-
-    function loadDisqus() {
-      window.disqus_config = function () {
-        this.page.identifier = 'post-{{ post.id }}';
-      };
-      var s = document.createElement('script');
-      s.src = 'https://ramkiransblog.disqus.com/embed.js';
-      s.setAttribute('data-timestamp', +new Date());
-      (document.head || document.body).appendChild(s);
-    }
-
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        if (entries.some(function (e) { return e.isIntersecting; })) {
-          loadDisqus();
-          io.disconnect();
-        }
-      }, { rootMargin: '200px' });
-      io.observe(target);
-    } else {
-      loadDisqus();
-    }
-  })();
-</script>
 {% endblock %}
