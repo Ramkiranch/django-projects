@@ -156,6 +156,51 @@ h1, h2, h3, h4 {
   font-weight: 600;
 }
 
+/* About page */
+.about-page {
+  max-width: 70ch;
+}
+.about-page .lead {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: #343a40;
+  margin-bottom: 2rem;
+}
+.about-page h2 {
+  margin-top: 2.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #e9ecef;
+}
+.about-page .topic {
+  margin-bottom: 1.75rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--rk-accent);
+}
+.about-page .topic h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--rk-accent);
+}
+.about-page .topic p {
+  margin-bottom: 0;
+}
+.about-page .cta {
+  font-size: 1.05rem;
+  padding: 1rem 1.25rem;
+  background: rgba(13, 110, 253, 0.06);
+  border-radius: 0.5rem;
+  margin-top: 1.5rem;
+}
+.about-page hr {
+  margin-top: 3rem;
+}
+.about-page .disclaimer {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-bottom: 0;
+}
+
 .post-hero img {
   width: 100%;
   max-height: 420px;
