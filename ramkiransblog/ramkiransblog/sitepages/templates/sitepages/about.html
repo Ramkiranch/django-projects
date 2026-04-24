@@ -2,22 +2,76 @@
 {% load static %}
 
 {% block title %}About — Ramkiran's Blog{% endblock %}
+{% block meta_description %}Ram is a Senior Software Engineering Manager in fintech writing about engineering leadership, AI in the enterprise, and the long game.{% endblock %}
 
 {% block content %}
   <section class="hero">
-    <h1>About the blog</h1>
-    <img src="{% static 'sitepages/about.jpg' %}" alt="Ramkiran Chevendra">
+    <h1>About</h1>
+    <img src="{% static 'sitepages/about.jpg' %}" alt="Ram Chevendra">
   </section>
 
-  <article class="prose mx-auto">
-    <p>
-      I am Venkata Ramkiran Chevendra. I'm enthusiastic about web development
-      and always interested in learning new technologies. This blog reflects
-      my views and opinions on the technologies I use and on what's new in the
-      market &mdash; with the occasional fun post mixed in.
+  <article class="prose mx-auto about-page">
+    <p class="lead">
+      I'm Ram &mdash; a Senior Software Engineering Manager in fintech, based just
+      outside Dallas in Argyle, Texas. By day, I lead engineering teams building
+      systems that move real money for real people. By night (and during nap times),
+      I write about what I'm learning along the way.
     </p>
+
+    <h2>What I write about here</h2>
+    <p>This blog sits at the intersection of three things I care deeply about:</p>
+
+    <section class="topic">
+      <h3>Engineering leadership</h3>
+      <p>
+        I write about the craft of managing engineers &mdash; team topology,
+        technical decision-making, coaching, and the messy human parts of the job
+        that no framework fully captures. Fintech shapes how I think about
+        tradeoffs, but the lessons travel.
+      </p>
+    </section>
+
+    <section class="topic">
+      <h3>AI in the enterprise</h3>
+      <p>
+        I'm endlessly curious about how agentic AI, RAG architectures, and MCP are
+        reshaping engineering work &mdash; and what it actually takes to deploy any
+        of this usefully inside a large organization. Expect posts on subagent
+        patterns, PII detection pipelines, document processing with Textract and
+        embeddings, and the realities of evaluating LLM systems when quality
+        really matters.
+      </p>
+    </section>
+
+    <section class="topic">
+      <h3>The long game</h3>
+      <p>
+        I'm ambitious and perpetually learning &mdash; always reading,
+        experimenting, or chasing the next idea. I'll share what's working, what
+        isn't, and the frameworks I'm using to think about career growth,
+        financial independence, and staying technical as a leader.
+      </p>
+    </section>
+
+    <h2>Off the clock</h2>
     <p>
-      I also like football (aka soccer), so you'll find a few posts on that here too.
+      I'm a husband and dad to a toddler and an infant &mdash; which means most of
+      my "free time" happens before 6&nbsp;AM or after bedtime. I run half
+      marathons (five down, chasing a sub-2:00) and have recently gotten curious
+      about golf.
+    </p>
+
+    <p class="cta">
+      If any of this resonates &mdash; whether you're an EM navigating the AI
+      shift, a senior engineer eyeing leadership, or someone building in fintech
+      &mdash; I'd love to hear from you.
+    </p>
+
+    <hr>
+
+    <p class="disclaimer">
+      All views and opinions expressed on this blog are my own and do not reflect
+      the views of any past or present employer.
     </p>
   </article>
 {% endblock %}
