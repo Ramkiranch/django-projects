@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load markdown_filters %}
 
 {% block title %}{{ post.title }} — Ramkiran's Blog{% endblock %}
 {% block meta_description %}{{ post.summary }}{% endblock %}
@@ -15,7 +16,7 @@
     </figure>
 
     <div class="prose">
-      {{ post.body|linebreaks }}
+      {{ post.body|markdown }}
     </div>
 
     {% comment %}

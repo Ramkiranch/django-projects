@@ -68,3 +68,52 @@ class PostDetailViewTests(TestCase):
     def test_detail_returns_404_for_missing_post(self):
         response = self.client.get(reverse('post_detail', args=[99999]))
         self.assertEqual(response.status_code, 404)
+
+    def test_detail_renders_markdown_in_body(self):
+        post = Post.objects.create(
+            title='Markdown post',
+            pub_date=datetime(2026, 5, 1, tzinfo=timezone.utc),
+            image=SimpleUploadedFile('md.png', ONE_PIXEL_PNG, content_type='image/png'),
+            body=(
+                '## Subheading\n\n'
+                'A paragraph with **bold** and *italic* text and `inline code`.\n\n'
+                '1. First item\n'
+                '2. Second item\n\n'
+                '- Bullet one\n'
+                '- Bullet two\n\n'
+                '> A quoted line.\n'
+            ),
+        )
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn('<h2>Subheading</h2>', body)
+        self.assertIn('<strong>bold</strong>', body)
+        self.assertIn('<em>italic</em>', body)
+        self.assertIn('<code>inline code</code>', body)
+        self.assertIn('<ol>', body)
+        self.assertIn('<li>First item</li>', body)
+        self.assertIn('<ul>', body)
+        self.assertIn('<li>Bullet one</li>', body)
+        self.assertIn('<blockquote>', body)
+
+
+class MarkdownFilterTests(TestCase):
+    def test_strip_markdown_removes_syntax(self):
+        from posts.templatetags.markdown_filters import strip_markdown
+
+        text = (
+            '## Heading\n\n'
+            'Para with **bold**, *italic*, and `code`.\n\n'
+            '1. one\n2. two\n\n- a\n- b\n\n'
+            '[link](https://x) and ![alt](https://x.png)\n\n'
+            '> quoted\n'
+        )
+        cleaned = strip_markdown(text)
+        for token in ('##', '**', '*', '`', '[', ']', '(', ')', '!', '>', '- ', '1.'):
+            self.assertNotIn(token, cleaned)
+        self.assertIn('Heading', cleaned)
+        self.assertIn('bold', cleaned)
+        self.assertIn('link', cleaned)
+        self.assertIn('alt', cleaned)
+        self.assertIn('quoted', cleaned)
