@@ -1,0 +1,35 @@
+<footer class="site-footer">
+  <div class="site-footer__cols">
+    <div class="site-footer__brand">
+      <div class="wordmark wordmark--lg">
+        bookish<span class="wordmark__accent">bailee</span>
+      </div>
+      <div class="site-footer__tagline">written between bedtimes</div>
+    </div>
+
+    <div class="site-footer__col">
+      <div class="site-footer__head">Read</div>
+      {% for cat in nav_categories %}
+        <a class="site-footer__link" href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="site-footer__col">
+      <div class="site-footer__head">More</div>
+      <a class="site-footer__link" href="{% url 'about' %}">About</a>
+      {% if feature_flags.show_subscriber_content %}
+        <a class="site-footer__link" href="{% url 'home' %}#newsletter">Subscribe</a>
+      {% endif %}
+    </div>
+
+    <div class="site-footer__col">
+      <div class="site-footer__head">Elsewhere</div>
+      <a class="site-footer__link" href="mailto:hello@bookishbailee.com">Email</a>
+    </div>
+  </div>
+
+  <div class="site-footer__bar">
+    <span>&copy; {% now "Y" %} bookish bailee · Est. {% now "Y" %}</span>
+    <span>Made slowly, between cups</span>
+  </div>
+</footer>

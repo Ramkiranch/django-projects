@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static markdown_filters %}
+
+{% block title %}{{ post.title }} · bookish bailee{% endblock %}
+{% block meta_description %}{{ post.excerpt }}{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block og_description %}{{ post.excerpt }}{% endblock %}
+
+{% block content %}
+{# ─── Breadcrumb ─── #}
+<div class="breadcrumb">
+  <a href="{% url 'home' %}">Home</a>
+  <span class="breadcrumb__sep">/</span>
+  <a href="{{ post.category.get_absolute_url }}">{{ post.category.name }}</a>
+  <span class="breadcrumb__sep">/</span>
+  <span class="breadcrumb__current">{{ post.title }}</span>
+</div>
+
+{# ─── Title block ─── #}
+<section class="post-title-block">
+  <div class="post-title-block__chiprow">
+    <a class="chip-outline" href="{{ post.category.get_absolute_url }}">{{ post.category.name }}</a>
+    <span class="meta-cap">{{ post.pub_date|date:"F j, Y" }} · {{ post.reading_time }} min read</span>
+  </div>
+  <h1 class="post-title">{{ post.title }}</h1>
+  <p class="post-dek">{{ post.excerpt }}</p>
+</section>
+
+{# ─── Hero ─── #}
+{% if post.image %}
+  <figure class="post-hero">
+    <img src="{{ post.image_post_hero.url }}" alt="{{ post.title }}">
+    {% if post.caption %}<figcaption>{{ post.caption }}</figcaption>{% endif %}
+  </figure>
+{% endif %}
+
+{# ─── Body grid ─── #}
+<article class="post-layout">
+  <aside class="post-layout__rail-l" aria-label="Author">
+    <div class="post-layout__sticky">
+      <div class="author-chip">
+        <div class="author-chip__avatar">B</div>
+        <div>
+          <div class="author-chip__name">Bailee</div>
+          <div class="author-chip__role">Writer</div>
+        </div>
+      </div>
+      <div class="author-chip__bio">
+        <div>Chiropractor</div>
+        <div>Anatomy professor</div>
+        <div>Mom of two</div>
+      </div>
+      <div class="rail-block">
+        <div class="rail-block__head">Share</div>
+        <div class="rail-block__items">
+          <a href="mailto:?subject={{ post.title|urlencode }}">Email a friend</a>
+          <a href="#" onclick="navigator.clipboard.writeText(location.href);return false;">Copy link</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="post-layout__body prose">
+    {{ post.body|markdown }}
+
+    <div class="signoff">
+      <div>
+        <div class="hand-note">yours, between bedtimes —</div>
+        <div class="signoff__name">Bailee</div>
+      </div>
+      <div class="signoff__date">
+        <div class="meta-cap">Published</div>
+        <div class="signoff__date-value">{{ post.pub_date|date:"F j, Y" }}</div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="post-layout__rail-r" aria-label="Filed under">
+    <div class="post-layout__sticky">
+      {% if post.tags.all %}
+        <div class="rail-block">
+          <div class="rail-block__head">Filed under</div>
+          <ul class="filed-under">
+            {% for tag in post.tags.all %}
+              <li><a href="{{ tag.get_absolute_url }}">— {{ tag.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      {% with toc=post.body|render_toc %}
+        {% if toc %}
+          <div class="rail-block toc">
+            <div class="rail-block__head">In this essay</div>
+            {{ toc }}
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+  </aside>
+</article>
+
+{# ─── Related ─── #}
+{% if related %}
+  <section class="continue-reading">
+    <header class="continue-reading__head">
+      <h3>Keep <em>reading</em></h3>
+      <a class="micro-link" href="{% url 'home' %}">All essays →</a>
+    </header>
+    <div class="continue-reading__grid">
+      {% for r in related %}
+        <a class="related" href="{{ r.get_absolute_url }}">
+          {% if r.image %}
+            <div class="related__media">
+              <img src="{{ r.image_related.url }}" alt="{{ r.title }}" loading="lazy">
+            </div>
+          {% endif %}
+          <div class="related__copy">
+            <div class="meta-cap meta-cap--accent">{{ r.category.name }} · {{ r.reading_time }} min read</div>
+            <div class="related__title">{{ r.title }}</div>
+            <div class="hand-note hand-note--accent">read on →</div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+{% endblock %}

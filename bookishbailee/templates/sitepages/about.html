@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About · bookish bailee{% endblock %}
+
+{% block content %}
+{# ─── Hero ─── #}
+<section class="about-hero">
+  <figure class="about-hero__media">
+    <div class="placeholder placeholder--3-4">
+      <span>bailee · in the office</span>
+    </div>
+    <div class="about-hero__sprig" aria-hidden="true">
+      {% include "partials/botanical/sprig.html" %}
+    </div>
+  </figure>
+  <div class="about-hero__copy">
+    <div class="eyebrow eyebrow--wide">About the writer</div>
+    <h1 class="about-hero__title">Hi, I'm <em>Bailee.</em></h1>
+    <p class="about-hero__lede">
+      Chiropractor. Anatomy professor. Mother of two. Reader of long
+      novels and short bedtime stories.
+    </p>
+  </div>
+</section>
+
+{# ─── Stats ─── #}
+<section class="about-stats">
+  <div class="about-stats__cell">
+    <div class="about-stats__num">{{ total_posts }}</div>
+    <div class="about-stats__label">essays so far</div>
+  </div>
+  <div class="about-stats__cell">
+    <div class="about-stats__num">{{ category_count }}</div>
+    <div class="about-stats__label">categories</div>
+  </div>
+  <div class="about-stats__cell">
+    <div class="about-stats__num">{% if latest_post_date %}{{ latest_post_date|date:"M Y" }}{% else %}—{% endif %}</div>
+    <div class="about-stats__label">latest letter</div>
+  </div>
+  <div class="about-stats__cell">
+    <div class="about-stats__num">5:42<span class="about-stats__num-small">am</span></div>
+    <div class="about-stats__label">the time the kitchen is quiet</div>
+  </div>
+</section>
+
+{# ─── Longer version ─── #}
+<section class="about-long">
+  <div>
+    <div class="eyebrow">The longer version</div>
+    <h2 class="about-long__title">
+      Two careers. <em>Two children.</em> One messy, full life.
+    </h2>
+  </div>
+  <div class="about-long__body">
+    <p>
+      I spend my weekdays in two places that look nothing alike: a quiet
+      adjusting room where I work with patients one at a time, and a
+      lecture hall where I teach Gross Anatomy to a hundred first-years
+      who are mostly terrified of the lab.
+    </p>
+    <p>
+      I spend my evenings and most of my weekends with my husband and
+      our two kids, doing the very ordinary things — laundry, library
+      runs, lentil soup, bedtime stories that get read four times. This
+      blog is the space in between.
+    </p>
+    <p>
+      <em>Placeholder copy.</em> The real bio lives in <code>templates/sitepages/about.html</code>
+      — swap when you're ready.
+    </p>
+  </div>
+</section>
+
+{# ─── Categories ─── #}
+{% if categories %}
+  <section class="about-categories">
+    <div class="eyebrow">What lives here</div>
+    <div class="about-categories__grid">
+      {% for cat in categories %}
+        <a class="about-categories__tile" href="{{ cat.get_absolute_url }}">
+          <div class="about-categories__name">{{ cat.name }}</div>
+          {% if cat.tagline %}
+            <div class="hand-note hand-note--accent">{{ cat.tagline }}</div>
+          {% endif %}
+          <div class="meta-cap meta-cap--accent">{{ cat.count }} essay{{ cat.count|pluralize }} →</div>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{# ─── CTA ─── #}
+<section class="cta-band">
+  <div class="cta-band__ornament cta-band__ornament--tl" aria-hidden="true">
+    {% include "partials/botanical/corner_spray.html" %}
+  </div>
+  <div class="cta-band__ornament cta-band__ornament--br" aria-hidden="true">
+    {% include "partials/botanical/corner_spray.html" %}
+  </div>
+  <div class="cta-band__inner">
+    <h2 class="cta-band__title">Want to <em>write back?</em></h2>
+    <p class="cta-band__lede">
+      I read every email. Replies might take a week — there are usually toddlers involved.
+    </p>
+    <a class="btn-accent btn-accent--lg" href="mailto:hello@bookishbailee.com">hello@bookishbailee.com</a>
+  </div>
+</section>
+{% endblock %}

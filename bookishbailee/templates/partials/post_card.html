@@ -1,0 +1,18 @@
+{# expects: post, index (1-based, optional, used as the watermark numeral) #}
+<article class="post-card">
+  <a class="post-card__media" href="{{ post.get_absolute_url }}">
+    {% if post.image %}
+      <img src="{{ post.image_card.url }}" alt="{{ post.title }}" loading="lazy">
+    {% endif %}
+    <span class="post-card__chip">{{ post.category.name }}</span>
+    {% if index %}<span class="post-card__numeral">0{{ index }}</span>{% endif %}
+  </a>
+  <h3 class="post-card__title">
+    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+  </h3>
+  <p class="post-card__excerpt">{{ post.excerpt }}</p>
+  <div class="post-card__meta">
+    <span>{{ post.reading_time }} min read</span>
+    <span class="post-card__date">{{ post.pub_date_modified }}</span>
+  </div>
+</article>

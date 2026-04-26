@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}bookish bailee — a magazine-feel personal journal{% endblock %}
+{% block og_title %}bookish bailee{% endblock %}
+
+{% block content %}
+{% if featured %}
+  {# ─── Hero ─── #}
+  <section class="hero">
+    <div class="hero__lede">
+      <div class="hero__eyebrow">Latest · {{ featured.pub_date|date:"F Y" }}</div>
+      <h1 class="hero__title">
+        Notes from a<br>
+        <em>working</em> reader<br>
+        between bedtimes.
+      </h1>
+      <p class="hero__body">
+        A slow, honest journal on the books on the nightstand, the body
+        in motion, and the quiet middle parts of an ordinary life.
+      </p>
+      <div class="hero__cta">
+        <a class="btn-accent" href="{{ featured.get_absolute_url }}">Read the latest</a>
+        <span class="hand-note hand-note--accent">↳ or just browse →</span>
+      </div>
+    </div>
+
+    <figure class="hero__media">
+      {% if featured.image %}
+        <img src="{{ featured.image_home_hero.url }}" alt="{{ featured.title }}" loading="eager">
+      {% endif %}
+      <div class="hero__sprig" aria-hidden="true">
+        {% include "partials/botanical/sprig.html" %}
+      </div>
+      <div class="hero__date-stamp">{{ featured.pub_date|date:"F · Y" }}</div>
+    </figure>
+  </section>
+
+  {# ─── Index strip ─── #}
+  {% if index_strip %}
+    <section class="index-strip">
+      <div class="index-strip__label">In this issue</div>
+      <div class="index-strip__items">
+        {% for post in index_strip %}
+          <a class="index-strip__item" href="{{ post.get_absolute_url }}">
+            <span class="index-strip__num">0{{ forloop.counter }}</span>
+            <em class="index-strip__title">{{ post.title }}</em>
+          </a>
+        {% endfor %}
+      </div>
+      <a class="micro-link" href="{% url 'home' %}">Browse all →</a>
+    </section>
+  {% endif %}
+
+  {# ─── Featured + sidebar ─── #}
+  <section class="feature-grid">
+    <article class="feature-grid__main">
+      <div class="feature-grid__chiprow">
+        <span class="chip-solid">Featured</span>
+        <span class="meta-cap">{{ featured.category.name }} · {{ featured.pub_date|date:"F j, Y" }}</span>
+      </div>
+      <h2 class="feature-grid__title">
+        <a href="{{ featured.get_absolute_url }}">{{ featured.title }}</a>
+      </h2>
+      <p class="feature-grid__lede">{{ featured.excerpt }}</p>
+      {% if featured.image %}
+        <a class="feature-grid__media" href="{{ featured.get_absolute_url }}">
+          <img src="{{ featured.image_featured.url }}" alt="{{ featured.title }}" loading="lazy">
+        </a>
+      {% endif %}
+      <div class="feature-grid__footer">
+        <span>{{ featured.reading_time }} min read</span>
+        <a class="micro-link" href="{{ featured.get_absolute_url }}">Read the essay →</a>
+      </div>
+    </article>
+
+    <aside class="feature-grid__aside">
+      <div class="feature-grid__aside-sticky">
+        <div class="eyebrow">On the shelf</div>
+        <ol class="bookshelf">
+          <li class="bookshelf__item">
+            <span class="bookshelf__num">1</span>
+            <div>
+              <div class="bookshelf__title">Demon Copperhead</div>
+              <div class="bookshelf__author">Barbara Kingsolver</div>
+            </div>
+          </li>
+          <li class="bookshelf__item">
+            <span class="bookshelf__num">2</span>
+            <div>
+              <div class="bookshelf__title">The Body Keeps the Score</div>
+              <div class="bookshelf__author">Bessel van der Kolk</div>
+            </div>
+          </li>
+          <li class="bookshelf__item">
+            <span class="bookshelf__num">3</span>
+            <div>
+              <div class="bookshelf__title">Hunt, Gather, Parent</div>
+              <div class="bookshelf__author">Michaeleen Doucleff</div>
+            </div>
+          </li>
+          <li class="bookshelf__item">
+            <span class="bookshelf__num">4</span>
+            <div>
+              <div class="bookshelf__title">Tom Lake</div>
+              <div class="bookshelf__author">Ann Patchett</div>
+            </div>
+          </li>
+        </ol>
+
+        <div class="right-now">
+          <div class="right-now__tab">Right now</div>
+          <div class="hand-note hand-note--accent">currently re-reading</div>
+          <p><em>Gilead</em>, in ten-page increments before bed.</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+{% else %}
+  <section class="empty-state">
+    <h1 class="empty-state__title">Nothing here <em>yet</em>.</h1>
+    <p>Sign in to the admin and write the first essay.</p>
+  </section>
+{% endif %}
+
+{# ─── Recent letters ─── #}
+{% if recent %}
+  <section class="recent">
+    <header class="recent__head">
+      <h2 class="recent__title">Recent <em>letters</em></h2>
+      <a class="micro-link" href="{% url 'home' %}">View all →</a>
+    </header>
+    <div class="recent__grid">
+      {% for post in recent %}
+        {% include "partials/post_card.html" with post=post index=forloop.counter %}
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{% if feature_flags.show_subscriber_content %}
+  {% include "partials/newsletter_band.html" %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% load static %}
+<header class="site-header">
+  <a class="wordmark" href="{% url 'home' %}">
+    bookish<span class="wordmark__accent">bailee</span>
+  </a>
+
+  <nav class="site-nav" aria-label="Primary">
+    {% for cat in nav_categories %}
+      <a class="site-nav__link {% if request.resolver_match.url_name == 'category_detail' and request.resolver_match.kwargs.slug == cat.slug %}is-active{% endif %}"
+         href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
+    {% endfor %}
+    <a class="site-nav__link {% if request.resolver_match.url_name == 'about' %}is-active{% endif %}"
+       href="{% url 'about' %}">About</a>
+  </nav>
+
+  {% if feature_flags.show_subscriber_content %}
+    <a class="subscribe-pill" href="{% url 'home' %}#newsletter">Subscribe</a>
+  {% else %}
+    <span class="subscribe-pill-placeholder" aria-hidden="true"></span>
+  {% endif %}
+</header>

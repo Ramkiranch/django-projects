@@ -1,0 +1,37 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{% block meta_description %}A magazine-feel personal journal on books, anatomy, and the quiet middle parts of family life.{% endblock %}">
+    <meta name="theme-color" content="#bc6650">
+
+    <title>{% block title %}bookish bailee{% endblock %}</title>
+
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="{% static 'fonts/inter-400.woff2' %}">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="{% static 'fonts/fraunces-300.woff2' %}">
+
+    <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+
+    {% block og %}
+      <meta property="og:title" content="{% block og_title %}bookish bailee{% endblock %}">
+      <meta property="og:description" content="{% block og_description %}A magazine-feel personal journal.{% endblock %}">
+      <meta property="og:type" content="website">
+    {% endblock %}
+
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body>
+    {% include "partials/nav.html" %}
+
+    <main id="main">
+      {% block content %}{% endblock %}
+    </main>
+
+    {% include "partials/footer.html" %}
+  </body>
+</html>

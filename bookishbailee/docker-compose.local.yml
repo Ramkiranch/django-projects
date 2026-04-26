@@ -1,0 +1,13 @@
+# Local-dev overrides: skip Caddy (binds to host instead) and expose
+# gunicorn directly on http://localhost:8000.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
+
+services:
+  web:
+    ports:
+      - "8000:8000"
+
+  caddy:
+    profiles: ["disabled"]

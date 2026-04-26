@@ -1,0 +1,24 @@
+{# Visual-only for MVP — form has no action; subscriber wiring is v2. #}
+<section class="newsletter-band" id="newsletter">
+  <div class="newsletter-band__ornament newsletter-band__ornament--tr">
+    {% include "partials/botanical/corner_spray.html" %}
+  </div>
+
+  <div class="newsletter-band__copy">
+    <div class="newsletter-band__eyebrow">— The Sunday Letter</div>
+    <h2 class="newsletter-band__title">
+      One letter,<br>every <em>Sunday</em> morning.
+    </h2>
+    <p class="newsletter-band__lede">
+      A short essay, what I'm reading, and one thing I learned in the lab
+      or at the kitchen table. Nothing more.
+    </p>
+    <div class="hand-note newsletter-band__hand">— join the quiet readers</div>
+  </div>
+
+  <form class="newsletter-band__form" onsubmit="event.preventDefault();" aria-label="Subscribe to the newsletter">
+    <input class="newsletter-band__input" type="email" placeholder="your@email" aria-label="Email address" disabled>
+    <button class="btn-accent" type="submit" disabled title="Coming soon">Subscribe</button>
+    <div class="newsletter-band__small">No spam. Unsubscribe anytime. Mostly book recommendations.</div>
+  </form>
+</section>
