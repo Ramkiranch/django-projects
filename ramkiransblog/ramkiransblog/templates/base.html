@@ -71,10 +71,16 @@
       {% if messages %}
         <div class="container">
           {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-              {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+            {# message.tags includes extra_tags (e.g. "subscribed success"), which
+               breaks Bootstrap's `alert-<level>` class. Use level_tag instead —
+               that's just the level name. Also map Django's "error" to Bootstrap's
+               "danger" since Bootstrap doesn't have an `alert-error` class. #}
+            {% with level=message.level_tag %}
+              <div class="alert alert-{% if level == 'error' %}danger{% else %}{{ level|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endwith %}
             {% if 'subscribed' in message.extra_tags %}
               {# Fire Plausible custom event so signups show up as a goal in the dashboard #}
               <script>window.plausible && plausible('Subscribed');</script>

@@ -397,6 +397,30 @@ class PlausibleEventTests(TestCase):
 
 
 @override_settings(RATELIMIT_ENABLE=False)
+class SuccessBannerTests(TestCase):
+    """Regression: extra_tags='subscribed' must NOT pollute the
+    Bootstrap alert class. Earlier code used `message.tags` which
+    rendered as `alert-subscribed success` (broken) instead of
+    `alert-success` (correct, green)."""
+
+    @patch('subscribers.views.send_confirmation_email', return_value=True)
+    def test_signup_renders_green_bootstrap_success_alert(self, _mock_send):
+        response = self.client.post(
+            reverse('subscribe'),
+            {'email': 'banner@example.com', 'source': 'footer', 'website': ''},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        # The correct Bootstrap success class
+        self.assertIn('alert-success', body)
+        # The broken regression form must NOT appear
+        self.assertNotIn('alert-subscribed', body)
+        # Sanity: the actual thanks-you message renders
+        self.assertIn("almost there", body)
+
+
+@override_settings(RATELIMIT_ENABLE=False)
 class CSVExportTests(TestCase):
     def setUp(self):
         Subscriber.objects.create(email='a@example.com', source='footer')
