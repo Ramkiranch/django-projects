@@ -20,10 +20,12 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django_ratelimit.decorators import ratelimit
 
 from .emails import send_confirmation_email
 from .forms import SubscribeForm
 from .models import Subscriber
+from .ratelimit import client_ip
 from .tokens import read_token
 
 THANKS_MESSAGE = (
@@ -31,6 +33,9 @@ THANKS_MESSAGE = (
     "and click it to activate your subscription."
 )
 ALREADY_CONFIRMED_MESSAGE = "Thanks — you're already confirmed."
+RATE_LIMITED_MESSAGE = (
+    "Too many signup attempts from this address. Please try again later."
+)
 
 # 14 days. Long enough that someone who signs up before a long weekend
 # can still confirm; short enough to expire stolen-link replays.
@@ -40,13 +45,22 @@ CONFIRM_TOKEN_MAX_AGE = 60 * 60 * 24 * 14
 UNSUBSCRIBE_TOKEN_MAX_AGE = 60 * 60 * 24 * 365
 
 
+@ratelimit(key=client_ip, rate='5/h', method='POST', block=False)
 @require_POST
 def subscribe(request):
+    # Soft block: surface a friendly flash message instead of a 403, so
+    # legit users who happen to hit the limit (testing on their own site,
+    # multiple family members behind the same NAT) get a clear UX rather
+    # than an opaque error page.
+    if getattr(request, 'limited', False):
+        messages.error(request, RATE_LIMITED_MESSAGE)
+        return _back(request)
+
     form = SubscribeForm(request.POST)
 
     # Spam: pretend success, write nothing.
     if form.is_spam():
-        messages.success(request, THANKS_MESSAGE)
+        messages.success(request, THANKS_MESSAGE, extra_tags='subscribed')
         return _back(request)
 
     if form.is_valid():
@@ -67,9 +81,9 @@ def subscribe(request):
         # a different message and no extra email.
         if created or not subscriber.confirmed:
             send_confirmation_email(subscriber, request=request)
-            messages.success(request, THANKS_MESSAGE)
+            messages.success(request, THANKS_MESSAGE, extra_tags='subscribed')
         else:
-            messages.success(request, ALREADY_CONFIRMED_MESSAGE)
+            messages.success(request, ALREADY_CONFIRMED_MESSAGE, extra_tags='subscribed')
     else:
         for error in form.errors.get('email', []):
             messages.error(request, error)
@@ -77,6 +91,7 @@ def subscribe(request):
     return _back(request)
 
 
+@ratelimit(key=client_ip, rate='10/h', method='GET', block=True)
 def confirm(request, token: str):
     """Activate a subscription via the link in the confirmation email."""
     try:
@@ -103,6 +118,7 @@ def confirm(request, token: str):
     return render(request, 'subscribers/confirmed.html')
 
 
+@ratelimit(key=client_ip, rate='10/h', method='GET', block=True)
 def unsubscribe(request, token: str):
     """One-click unsubscribe from any broadcast email."""
     try:

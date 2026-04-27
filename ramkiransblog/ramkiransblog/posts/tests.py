@@ -177,6 +177,44 @@ class OpenGraphTests(TestCase):
         self.assertIn('datePublished', data)
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(), SITE_URL='https://ramkiransblog.com')
+class PostAdminShareUrlsTests(TestCase):
+    """The Share URLs panel renders UTM-tagged links per platform."""
+
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        self.admin = User.objects.create_superuser('admin', 'admin@example.com', 'pwd-not-used')
+        self.client.force_login(self.admin)
+        self.post = make_post(0)
+
+    def test_change_form_lists_all_platforms_with_utm_tags(self):
+        response = self.client.get(f'/rk-admin/posts/post/{self.post.id}/change/')
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+
+        # All platforms present
+        for label in ('LinkedIn', 'Twitter/X', 'Instagram', 'Facebook', 'Newsletter'):
+            self.assertIn(label, body)
+
+        # UTM-tagged URLs use SITE_URL + post id
+        self.assertIn(
+            f'https://ramkiransblog.com/posts/{self.post.id}/?utm_source=linkedin&amp;utm_medium=social',
+            body,
+        )
+        self.assertIn(
+            f'https://ramkiransblog.com/posts/{self.post.id}/?utm_source=newsletter&amp;utm_medium=email',
+            body,
+        )
+
+    def test_panel_handles_unsaved_post_gracefully(self):
+        # Visiting the "add post" form (no obj.pk) should not crash
+        response = self.client.get('/rk-admin/posts/post/add/')
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn('save the post to see share URLs', body)
+
+
 class MarkdownFilterTests(TestCase):
     def test_strip_markdown_removes_syntax(self):
         from posts.templatetags.markdown_filters import strip_markdown
