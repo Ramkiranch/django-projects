@@ -70,10 +70,19 @@ def send_confirmation_email(subscriber: Subscriber, request=None) -> bool:
     """Send the double-opt-in confirmation email."""
     token = make_token(subscriber.id, action='confirm')
     confirm_path = reverse('subscribe_confirm', args=[token])
-    site_url = getattr(settings, 'SITE_URL', '').rstrip('/')
-    if request is not None and not site_url:
-        site_url = f"{request.scheme}://{request.get_host()}"
-    confirm_url = f"{site_url}{confirm_path}"
+
+    # When called from a web request (the normal signup path), trust the
+    # actual host that received the POST — that's authoritative even if
+    # SITE_URL is misconfigured. Fall back to SITE_URL only for callers
+    # without a request (e.g. management commands, scheduled jobs).
+    if request is not None:
+        confirm_url = request.build_absolute_uri(confirm_path)
+    else:
+        site_url = getattr(settings, 'SITE_URL', '').rstrip('/')
+        if not site_url:
+            logger.error('No request and no SITE_URL — cannot build confirm URL')
+            return False
+        confirm_url = f"{site_url}{confirm_path}"
 
     context = {
         'subscriber': subscriber,
