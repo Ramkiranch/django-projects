@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Unsubscribed — Ramkiran's Blog{% endblock %}
+
+{% block content %}
+  <section class="text-center py-5 mx-auto" style="max-width: 480px;">
+    <h1 class="display-6 mb-3">You're unsubscribed.</h1>
+    <p class="lead text-muted">
+      Sorry to see you go. You won't get any more emails from this list.
+    </p>
+    <p class="text-muted small mt-3">
+      Changed your mind? Sign up again from any page.
+    </p>
+    <p class="mt-4">
+      <a href="{% url 'home' %}" class="btn btn-primary">Back to the blog</a>
+    </p>
+  </section>
+{% endblock %}
