@@ -75,6 +75,10 @@
               {{ message }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+            {% if 'subscribed' in message.extra_tags %}
+              {# Fire Plausible custom event so signups show up as a goal in the dashboard #}
+              <script>window.plausible && plausible('Subscribed');</script>
+            {% endif %}
           {% endfor %}
         </div>
       {% endif %}
