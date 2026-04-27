@@ -1,0 +1,32 @@
+{% comment %}
+  Newsletter signup partial.
+  Include with: {% templatetag openblock %} include "subscribers/_form.html" with source="footer" {% templatetag closeblock %}
+  Available `source` values must match Subscriber.SOURCE_CHOICES.
+{% endcomment %}
+
+<form method="post" action="{% url 'subscribe' %}" class="subscribe-form" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="source" value="{{ source|default:'footer' }}">
+
+  {# Honeypot — hidden via CSS so humans don't see it; bots fill it and we drop the row. #}
+  <div class="d-none" aria-hidden="true">
+    <label>Leave this field blank
+      <input type="text" name="website" tabindex="-1" autocomplete="off">
+    </label>
+  </div>
+
+  <div class="input-group">
+    <input
+      type="email"
+      name="email"
+      class="form-control"
+      placeholder="you@example.com"
+      autocomplete="email"
+      aria-label="Email address"
+      required>
+    <button class="btn btn-primary" type="submit">Subscribe</button>
+  </div>
+  <small class="text-muted d-block mt-2">
+    Occasional posts on engineering leadership and AI. No spam, unsubscribe any time.
+  </small>
+</form>

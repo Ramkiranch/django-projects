@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Subscription confirmed — Ramkiran's Blog{% endblock %}
+
+{% block content %}
+  <section class="text-center py-5 mx-auto" style="max-width: 480px;">
+    <h1 class="display-6 mb-3">You're in. 🎉</h1>
+    <p class="lead text-muted">
+      Thanks for confirming. I'll send a note when new posts go up — usually
+      no more than once a month.
+    </p>
+    <p class="mt-4">
+      <a href="{% url 'home' %}" class="btn btn-primary">Back to the blog</a>
+    </p>
+  </section>
+{% endblock %}

@@ -1,0 +1,15 @@
+Hi,
+
+Thanks for signing up to {{ site_name }}.
+
+Click the link below to confirm your subscription. The link is good for
+14 days.
+
+  {{ confirm_url }}
+
+If you didn't sign up, you can ignore this email — you won't be added
+to the list unless you click the link.
+
+— {{ site_author }}{% if physical_address %}
+
+{{ physical_address }}{% endif %}

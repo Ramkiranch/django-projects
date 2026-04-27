@@ -37,8 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'posts',
     'sitepages',
+    'subscribers',
 ]
 
 MIDDLEWARE = [
@@ -65,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'subscribers.context_processors.site_globals',
             ],
         },
     },
@@ -132,6 +135,30 @@ STORAGES = {
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Public site identity (used in feeds, OG tags, sitemap, signup form copy)
+SITE_URL = env('SITE_URL', default='http://localhost:8000')
+SITE_NAME = "Ramkiran's Blog"
+SITE_AUTHOR = 'Ram Chevendra'
+
+# Resend transactional email (subscriber confirm + unsubscribe).
+# Empty API key => emails are skipped + warning logged; subscriber row still
+# created so dev/test signup still works without a real provider.
+RESEND_API_KEY = env('RESEND_API_KEY', default='')
+# `From` address. Until the domain is verified at resend.com you can use
+# the sandbox `onboarding@resend.dev` (only sends to your verified email).
+RESEND_FROM_EMAIL = env(
+    'RESEND_FROM_EMAIL',
+    default=f"{SITE_AUTHOR} <onboarding@resend.dev>",
+)
+# Replies bounce to this address (Resend doesn't accept inbound mail).
+# Leave empty to use the From address.
+RESEND_REPLY_TO = env('RESEND_REPLY_TO', default='')
+# CAN-SPAM compliance: physical mailing address shown in every broadcast.
+# Confirmation emails technically don't require it, but we include it for
+# consistency. Use a PO box if you don't want your home address out.
+MAIL_PHYSICAL_ADDRESS = env('MAIL_PHYSICAL_ADDRESS', default='')
 
 
 # Production hardening — only applied when DEBUG is False
