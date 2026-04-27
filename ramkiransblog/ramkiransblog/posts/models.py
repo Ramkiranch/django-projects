@@ -22,8 +22,29 @@ class Post(models.Model):
         return self.pub_date.strftime('%b %e %Y')
 
     def summary(self):
-        """Plain-text preview for cards. Strips Markdown syntax and truncates."""
+        """Plain-text preview for cards.
+
+        Skips the leading "All views are mine..." disclaimer (rendered as a
+        blockquote at the top of every post) so the home-page card preview
+        shows the actual first sentence of content, not the same disclaimer
+        repeated on every card. Specifically: skip leading blank lines,
+        blockquote lines (`> ...`), and horizontal rules (`---`, `***`,
+        `___`) until we find real prose.
+        """
         from .templatetags.markdown_filters import strip_markdown
 
-        plain = strip_markdown(self.body)
+        lines = self.body.splitlines()
+        i = 0
+        while i < len(lines):
+            stripped = lines[i].strip()
+            is_skippable = (
+                not stripped                         # blank line
+                or stripped.startswith('>')          # blockquote
+                or stripped in ('---', '***', '___') # horizontal rule
+            )
+            if not is_skippable:
+                break
+            i += 1
+        body_after_disclaimer = '\n'.join(lines[i:])
+        plain = strip_markdown(body_after_disclaimer)
         return plain[:160]

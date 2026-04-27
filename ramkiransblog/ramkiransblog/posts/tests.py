@@ -241,6 +241,86 @@ class PostAdminShareUrlsTests(TestCase):
         self.assertIn('save the post to see share URLs', body)
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class PostSummaryTests(TestCase):
+    """Post.summary() must skip the leading disclaimer (blockquote +
+    horizontal rule) so home-page card previews show real content,
+    not the same boilerplate on every card."""
+
+    def _make_post_with_body(self, body: str) -> Post:
+        return Post.objects.create(
+            title='Summary test',
+            pub_date=datetime(2026, 5, 1, tzinfo=timezone.utc),
+            image=SimpleUploadedFile('s.png', ONE_PIXEL_PNG, content_type='image/png'),
+            body=body,
+        )
+
+    def test_summary_skips_leading_blockquote_disclaimer(self):
+        body = (
+            "> _Views here are my own — not my employer's, past or present._\n\n"
+            "---\n\n"
+            "## Why I started this blog\n\n"
+            "I want to write about web development and football."
+        )
+        post = self._make_post_with_body(body)
+        summary = post.summary()
+        self.assertNotIn('Views here are my own', summary)
+        self.assertNotIn('employer', summary)
+        self.assertIn('Why I started this blog', summary)
+
+    def test_summary_skips_multi_line_blockquote(self):
+        body = (
+            "> _Multi-line disclaimer\n"
+            "> spanning two blockquote lines._\n\n"
+            "Real first paragraph here."
+        )
+        post = self._make_post_with_body(body)
+        self.assertEqual(post.summary().strip(), 'Real first paragraph here.')
+
+    def test_summary_handles_post_without_disclaimer(self):
+        body = "Just a normal post. No disclaimer here."
+        post = self._make_post_with_body(body)
+        self.assertIn('Just a normal post', post.summary())
+
+    def test_summary_truncates_to_160_chars(self):
+        body = 'A' * 500
+        post = self._make_post_with_body(body)
+        self.assertEqual(len(post.summary()), 160)
+
+    def test_summary_keeps_mid_post_blockquotes(self):
+        # Mid-post blockquotes are real content (e.g. quoting someone) and
+        # should NOT be skipped — only LEADING blockquotes are.
+        body = (
+            "First paragraph of real content here that fills enough chars "
+            "to reach the blockquote.\n\n"
+            "> A real quote inside the post.\n\n"
+            "More content."
+        )
+        post = self._make_post_with_body(body)
+        self.assertIn('First paragraph', post.summary())
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class PostDetailNoDuplicateSignupTests(TestCase):
+    """The post-end signup CTA was removed in favor of the single footer
+    form — verify it doesn't render on post detail anymore."""
+
+    def test_no_post_end_signup_section_on_detail(self):
+        post = Post.objects.create(
+            title='Test',
+            pub_date=datetime(2026, 5, 1, tzinfo=timezone.utc),
+            image=SimpleUploadedFile('t.png', ONE_PIXEL_PNG, content_type='image/png'),
+            body='Body.',
+        )
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body = response.content.decode()
+        # The post-end signup used <input name="source" value="post-end"> — verify gone
+        self.assertNotIn('value="post-end"', body)
+        self.assertNotIn("Liked this? Get notified", body)
+        # Footer signup (value="footer") still present — single CTA per page
+        self.assertIn('value="footer"', body)
+
+
 class MarkdownFilterTests(TestCase):
     def test_strip_markdown_removes_syntax(self):
         from posts.templatetags.markdown_filters import strip_markdown
