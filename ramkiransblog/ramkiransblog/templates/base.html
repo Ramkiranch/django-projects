@@ -71,10 +71,12 @@
       {% if messages %}
         <div class="container">
           {% for message in messages %}
-            {# message.tags includes extra_tags (e.g. "subscribed success"), which
-               breaks Bootstrap's `alert-<level>` class. Use level_tag instead —
-               that's just the level name. Also map Django's "error" to Bootstrap's
-               "danger" since Bootstrap doesn't have an `alert-error` class. #}
+            {% comment %}
+              message.tags includes extra_tags (e.g. "subscribed success"), which
+              breaks Bootstrap's `alert-<level>` class. Use level_tag instead —
+              that's just the level name. Also map Django's "error" to Bootstrap's
+              "danger" since Bootstrap doesn't have an `alert-error` class.
+            {% endcomment %}
             {% with level=message.level_tag %}
               <div class="alert alert-{% if level == 'error' %}danger{% else %}{{ level|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
                 {{ message }}
