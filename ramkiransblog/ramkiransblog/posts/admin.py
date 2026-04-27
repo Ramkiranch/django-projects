@@ -47,12 +47,34 @@ class PostAdmin(admin.ModelAdmin):
         }),
     )
 
+    # ModelAdmin display methods don't receive the request, so we stash
+    # it from the admin's view methods. This lets share_urls() build URLs
+    # against the actual host the admin user is browsing on (e.g.
+    # ramkiransblog.com in prod, localhost in dev) instead of relying on
+    # settings.SITE_URL being set correctly. Fine for a single-admin site;
+    # would need a thread-local refactor if many admin users hit this
+    # concurrently.
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        self._request = request
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def add_view(self, request, form_url='', extra_context=None):
+        self._request = request
+        return super().add_view(request, form_url, extra_context)
+
+    def _site_url(self) -> str:
+        request = getattr(self, '_request', None)
+        if request is not None:
+            return f'{request.scheme}://{request.get_host()}'
+        # Fallback for code paths that bypass the view methods (rare).
+        return getattr(settings, 'SITE_URL', 'http://localhost:8000').rstrip('/')
+
     @admin.display(description='Tracked URLs by platform')
     def share_urls(self, obj):
         if not obj.pk:
             return '(save the post to see share URLs)'
 
-        site_url = getattr(settings, 'SITE_URL', 'http://localhost:8000').rstrip('/')
+        site_url = self._site_url().rstrip('/')
 
         def url_for(source: str, medium: str) -> str:
             qs = urlencode({'utm_source': source, 'utm_medium': medium})

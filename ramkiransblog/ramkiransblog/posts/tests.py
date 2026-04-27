@@ -177,9 +177,19 @@ class OpenGraphTests(TestCase):
         self.assertIn('datePublished', data)
 
 
-@override_settings(MEDIA_ROOT=tempfile.mkdtemp(), SITE_URL='https://ramkiransblog.com')
+@override_settings(
+    MEDIA_ROOT=tempfile.mkdtemp(),
+    SITE_URL='http://localhost:8000',  # Misconfigured on purpose — request host should win
+    ALLOWED_HOSTS=['ramkiransblog.com'],
+)
 class PostAdminShareUrlsTests(TestCase):
-    """The Share URLs panel renders UTM-tagged links per platform."""
+    """The Share URLs panel renders UTM-tagged links per platform.
+
+    Critical: URLs must reflect the host the admin is being browsed
+    on (e.g. ramkiransblog.com), NOT settings.SITE_URL — which may
+    still be the localhost dev default if the operator forgot to set
+    it on the VM.
+    """
 
     def setUp(self):
         from django.contrib.auth import get_user_model
@@ -188,8 +198,11 @@ class PostAdminShareUrlsTests(TestCase):
         self.client.force_login(self.admin)
         self.post = make_post(0)
 
-    def test_change_form_lists_all_platforms_with_utm_tags(self):
-        response = self.client.get(f'/rk-admin/posts/post/{self.post.id}/change/')
+    def test_change_form_uses_request_host_not_misconfigured_site_url(self):
+        response = self.client.get(
+            f'/rk-admin/posts/post/{self.post.id}/change/',
+            HTTP_HOST='ramkiransblog.com',
+        )
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
 
@@ -197,19 +210,32 @@ class PostAdminShareUrlsTests(TestCase):
         for label in ('LinkedIn', 'Twitter/X', 'Instagram', 'Facebook', 'Newsletter'):
             self.assertIn(label, body)
 
-        # UTM-tagged URLs use SITE_URL + post id
+        # URLs must use the request host, NOT the misconfigured localhost SITE_URL
+        self.assertIn(
+            f'http://ramkiransblog.com/posts/{self.post.id}/?utm_source=linkedin&amp;utm_medium=social',
+            body,
+        )
+        self.assertIn(
+            f'http://ramkiransblog.com/posts/{self.post.id}/?utm_source=newsletter&amp;utm_medium=email',
+            body,
+        )
+        self.assertNotIn('localhost:8000', body)
+
+    def test_change_form_uses_https_when_request_is_https(self):
+        response = self.client.get(
+            f'/rk-admin/posts/post/{self.post.id}/change/',
+            HTTP_HOST='ramkiransblog.com',
+            **{'wsgi.url_scheme': 'https'},
+        )
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
         self.assertIn(
             f'https://ramkiransblog.com/posts/{self.post.id}/?utm_source=linkedin&amp;utm_medium=social',
             body,
         )
-        self.assertIn(
-            f'https://ramkiransblog.com/posts/{self.post.id}/?utm_source=newsletter&amp;utm_medium=email',
-            body,
-        )
 
     def test_panel_handles_unsaved_post_gracefully(self):
-        # Visiting the "add post" form (no obj.pk) should not crash
-        response = self.client.get('/rk-admin/posts/post/add/')
+        response = self.client.get('/rk-admin/posts/post/add/', HTTP_HOST='ramkiransblog.com')
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
         self.assertIn('save the post to see share URLs', body)
