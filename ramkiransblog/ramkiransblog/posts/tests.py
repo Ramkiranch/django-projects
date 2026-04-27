@@ -98,6 +98,85 @@ class PostDetailViewTests(TestCase):
         self.assertIn('<blockquote>', body)
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class SitemapTests(TestCase):
+    def test_sitemap_returns_200_with_xml_content_type(self):
+        response = self.client.get('/sitemap.xml')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('xml', response['Content-Type'].lower())
+
+    def test_sitemap_includes_post_and_static_urls(self):
+        post = make_post(0)
+        response = self.client.get('/sitemap.xml')
+        body = response.content.decode()
+        # Static pages
+        self.assertIn('<loc>', body)
+        self.assertIn(reverse('home'), body)
+        self.assertIn(reverse('about'), body)
+        # Post URL
+        self.assertIn(f'/posts/{post.id}/', body)
+
+
+class RobotsTxtTests(TestCase):
+    def test_robots_returns_200_text_plain(self):
+        response = self.client.get('/robots.txt')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/plain')
+
+    def test_robots_disallows_admin_path(self):
+        response = self.client.get('/robots.txt')
+        body = response.content.decode()
+        self.assertIn('User-agent: *', body)
+        self.assertIn('Disallow:', body)
+        self.assertIn('Sitemap:', body)
+        self.assertIn('/sitemap.xml', body)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class RSSFeedTests(TestCase):
+    def test_feed_returns_200_with_rss_content_type(self):
+        make_post(0)
+        response = self.client.get('/feed/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('rss', response['Content-Type'].lower())
+
+    def test_feed_lists_posts(self):
+        post = make_post(0)
+        response = self.client.get('/feed/')
+        body = response.content.decode()
+        self.assertIn("Ramkiran's Blog", body)
+        self.assertIn(post.title, body)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class OpenGraphTests(TestCase):
+    def test_post_detail_has_og_article_type_and_image(self):
+        post = make_post(0)
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body = response.content.decode()
+        self.assertIn('property="og:type" content="article"', body)
+        self.assertIn(f'property="og:title" content="{post.title}"', body)
+        # og:image is per-post, should reference the uploaded image URL
+        self.assertIn('property="og:image"', body)
+
+    def test_post_detail_has_jsonld_blogposting(self):
+        import json
+        import re
+        post = make_post(0)
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body = response.content.decode()
+        match = re.search(
+            r'<script type="application/ld\+json">\s*(\{.*?\})\s*</script>',
+            body, re.DOTALL,
+        )
+        self.assertIsNotNone(match, 'JSON-LD script not found on post detail')
+        data = json.loads(match.group(1))
+        self.assertEqual(data['@type'], 'BlogPosting')
+        self.assertEqual(data['headline'], post.title)
+        self.assertIn('author', data)
+        self.assertIn('datePublished', data)
+
+
 class MarkdownFilterTests(TestCase):
     def test_strip_markdown_removes_syntax(self):
         from posts.templatetags.markdown_filters import strip_markdown

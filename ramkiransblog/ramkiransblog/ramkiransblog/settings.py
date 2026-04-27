@@ -37,8 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'posts',
     'sitepages',
+    'subscribers',
 ]
 
 MIDDLEWARE = [
@@ -65,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'subscribers.context_processors.site_globals',
             ],
         },
     },
@@ -132,6 +135,12 @@ STORAGES = {
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Public site identity (used in feeds, OG tags, sitemap, signup form copy)
+SITE_URL = env('SITE_URL', default='http://localhost:8000')
+SITE_NAME = "Ramkiran's Blog"
+SITE_AUTHOR = 'Ram Chevendra'
 
 
 # Production hardening — only applied when DEBUG is False
