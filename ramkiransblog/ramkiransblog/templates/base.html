@@ -8,9 +8,11 @@
 
     <title>{% block title %}Ramkiran's Blog{% endblock %}</title>
 
-    {# Open Graph / Twitter Card — drives the preview when this URL is shared on
-       LinkedIn / Twitter / Slack / iMessage. Per-post pages override og_type,
-       og_image, og_description in posts_detail.html. #}
+    {% comment %}
+      Open Graph / Twitter Card — drives the preview when this URL is shared on
+      LinkedIn / Twitter / Slack / iMessage. Per-post pages override og_type,
+      og_image, og_description in posts_detail.html.
+    {% endcomment %}
     <meta property="og:site_name" content="{{ SITE_NAME }}">
     <meta property="og:title" content="{% block og_title %}Ramkiran's Blog{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Engineering leadership, AI in the enterprise, and the long game.{% endblock %}">

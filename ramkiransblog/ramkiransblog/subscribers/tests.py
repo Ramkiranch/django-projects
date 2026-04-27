@@ -230,6 +230,52 @@ class EmailSendTests(TestCase):
         ok = emails.send_confirmation_email(sub)
         self.assertFalse(ok)
 
+    @override_settings(SITE_URL='http://localhost:8000', ALLOWED_HOSTS=['ramkiransblog.com'])
+    def test_send_uses_request_host_not_misconfigured_site_url(self):
+        """Regression: SITE_URL='http://localhost:8000' must not leak into
+        production confirmation emails when a real HTTPS request is the
+        source of the signup."""
+        from django.test import RequestFactory
+        from subscribers import emails
+
+        sub = Subscriber.objects.create(email='target4@example.com', source='footer')
+        request = RequestFactory().post(
+            '/subscribe/',
+            HTTP_HOST='ramkiransblog.com',
+            **{'wsgi.url_scheme': 'https'},
+        )
+
+        with patch('resend.Emails.send') as mock_send:
+            emails.send_confirmation_email(sub, request=request)
+
+        params = mock_send.call_args[0][0]
+        # Must use the request's host, NOT the misconfigured SITE_URL default
+        self.assertIn('https://ramkiransblog.com/subscribe/confirm/', params['html'])
+        self.assertIn('https://ramkiransblog.com/subscribe/confirm/', params['text'])
+        self.assertNotIn('localhost', params['html'])
+        self.assertNotIn('localhost', params['text'])
+
+    @override_settings(SITE_URL='https://ramkiransblog.com')
+    def test_send_falls_back_to_site_url_without_request(self):
+        """Management-command / scheduled-job path: no request, use SITE_URL."""
+        from subscribers import emails
+
+        sub = Subscriber.objects.create(email='target5@example.com', source='footer')
+
+        with patch('resend.Emails.send') as mock_send:
+            emails.send_confirmation_email(sub)  # no request
+
+        params = mock_send.call_args[0][0]
+        self.assertIn('https://ramkiransblog.com/subscribe/confirm/', params['html'])
+
+    @override_settings(SITE_URL='')
+    def test_send_returns_false_without_request_or_site_url(self):
+        from subscribers import emails
+
+        sub = Subscriber.objects.create(email='target6@example.com', source='footer')
+        ok = emails.send_confirmation_email(sub)  # no request, empty SITE_URL
+        self.assertFalse(ok)
+
 
 class CSVExportTests(TestCase):
     def setUp(self):

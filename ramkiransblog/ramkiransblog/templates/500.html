@@ -1,7 +1,9 @@
-{# Self-contained on purpose: when a 500 fires, the request context
-   may be partially broken, so we deliberately don't extend base.html
-   (which depends on context processors / template tags / static files
-   that could themselves be the cause of the 500). #}
+{% comment %}
+  Self-contained on purpose: when a 500 fires, the request context
+  may be partially broken, so we deliberately don't extend base.html
+  (which depends on context processors / template tags / static files
+  that could themselves be the cause of the 500).
+{% endcomment %}
 <!doctype html>
 <html lang="en">
   <head>
