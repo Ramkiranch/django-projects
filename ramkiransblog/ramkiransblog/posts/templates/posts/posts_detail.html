@@ -50,20 +50,14 @@
       {{ post.body|markdown }}
     </div>
 
-    <hr class="my-5">
-
-    <aside class="post-signup p-4 bg-light rounded">
-      <h2 class="h5 mb-2">Liked this? Get notified of new posts.</h2>
-      <p class="text-muted small mb-3">
-        Engineering leadership and AI in the enterprise — straight to your inbox.
-      </p>
-      {% include "subscribers/_form.html" with source="post-end" %}
-    </aside>
-
     {% comment %}
-      Comments disabled — Disqus was surfacing stale threads from the old blog.
-      To re-enable, restore the Comments section and the extra_js Disqus
-      loader from git history (commit 73deefc introduced the removal; revert it).
+      The footer signup form (in base.html) already invites readers to
+      subscribe at the end of every page — no need to duplicate that
+      CTA here. Removed in favor of a single, consistent ask.
+
+      Comments disabled — Disqus was surfacing stale threads from the
+      old blog. To re-enable, restore the Comments section and the
+      extra_js Disqus loader from git history (commit 73deefc).
     {% endcomment %}
   </article>
 {% endblock %}
