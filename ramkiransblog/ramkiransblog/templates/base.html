@@ -13,6 +13,16 @@
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
           crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+    <!-- Privacy-friendly analytics by Plausible (cookie-less, no consent banner needed).
+         Plausible filters by configured domain, so localhost / dev hits are not recorded. -->
+    <script async src="https://plausible.io/js/pa-sICtU9F4qdfdb_TU3p6vd.js"></script>
+    <script>
+      window.plausible = window.plausible || function () { (plausible.q = plausible.q || []).push(arguments) },
+      plausible.init = plausible.init || function (i) { plausible.o = i || {} };
+      plausible.init();
+    </script>
+
     {% block extra_head %}{% endblock %}
   </head>
   <body class="d-flex flex-column min-vh-100 bg-body">
