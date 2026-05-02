@@ -156,6 +156,52 @@ h1, h2, h3, h4 {
   font-weight: 600;
 }
 
+/* Post-detail TOC sidebar */
+.post-toc {
+  font-size: 0.9rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding-right: 1rem;
+  top: 1rem;
+}
+.post-toc .toc ul {
+  list-style: none;
+  padding-left: 0.5rem;
+  margin: 0;
+}
+.post-toc .toc > ul {
+  padding-left: 0;
+}
+.post-toc .toc li {
+  margin: 0.35rem 0;
+  line-height: 1.4;
+}
+.post-toc .toc a {
+  color: #495057;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  padding-left: 0.5rem;
+  display: block;
+  transition: color 0.15s ease, border-left-color 0.15s ease;
+}
+.post-toc .toc a:hover {
+  color: var(--rk-accent);
+  border-left-color: var(--rk-accent);
+}
+
+/* Smooth scroll when a TOC link or any in-page anchor is clicked. */
+html { scroll-behavior: smooth; }
+
+/* Anchor offset so the target heading isn't flush against the viewport top. */
+.prose h2,
+.prose h3,
+.prose h4 { scroll-margin-top: 1rem; }
+
+/* "More from the blog" recommendations section */
+.more-posts h2 {
+  font-weight: 600;
+}
+
 /* About page */
 .about-page {
   max-width: 70ch;
