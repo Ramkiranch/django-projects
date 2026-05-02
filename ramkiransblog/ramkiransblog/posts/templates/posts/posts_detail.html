@@ -35,18 +35,29 @@
 {% endblock %}
 
 {% block content %}
-  <div class="row">
+  {% comment %}
+    Layout: the article is ALWAYS centered (max-width 760px, mx-auto)
+    regardless of whether the TOC is shown. The TOC, when present,
+    is absolutely positioned in the left gutter (above xl breakpoint
+    only — there isn't enough room at smaller widths). This keeps the
+    reading column visually anchored to the page center; the TOC reads
+    as supplementary info in the margin, not as a layout-shifting column.
+  {% endcomment %}
+  <div class="post-detail-layout">
 
     {% if show_toc %}
-      <aside class="col-lg-3 d-none d-lg-block order-lg-1">
-        <nav class="post-toc sticky-top" aria-label="In this post">
-          <h2 class="h6 text-muted text-uppercase fw-semibold mb-2">In this post</h2>
+      <div class="post-toc-rail d-none d-xl-block">
+        <nav class="post-toc" aria-label="In this post">
+          <p class="text-muted text-uppercase fw-semibold mb-2"
+             style="font-size: 0.7rem; letter-spacing: 0.08em;">
+            On this page
+          </p>
           {{ toc_html|safe }}
         </nav>
-      </aside>
+      </div>
     {% endif %}
 
-    <article class="col-lg-{% if show_toc %}9{% else %}9 mx-lg-auto{% endif %} order-lg-2 post-article">
+    <article class="post-article">
       <header class="mb-4">
         <h1 class="mb-2">{{ post.title }}</h1>
         <p class="post-meta mb-0">
@@ -82,4 +93,58 @@
     </article>
 
   </div>
+{% endblock %}
+
+{% block extra_js %}
+  {% if show_toc %}
+    <script>
+      // Active-section progress rail: highlight the TOC link whose heading
+      // is currently visible (closest to the top of the viewport). Pure
+      // IntersectionObserver — no scroll-event listener, no jQuery. ~30 LOC.
+      (function () {
+        const tocLinks = document.querySelectorAll('.post-toc .toc a[href^="#"]');
+        if (!tocLinks.length) return;
+
+        const linkById = new Map();
+        const headings = [];
+        tocLinks.forEach(function (link) {
+          const id = decodeURIComponent(link.getAttribute('href').slice(1));
+          const h = document.getElementById(id);
+          if (h) {
+            linkById.set(id, link);
+            headings.push(h);
+          }
+        });
+
+        if (!headings.length) return;
+
+        // Track which headings are above the trigger line so we can pick
+        // the lowest one (= the section the reader is currently in).
+        const visibility = new Map();
+        const observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            visibility.set(e.target.id, e.isIntersecting || e.boundingClientRect.top < 0);
+          });
+
+          let activeId = null;
+          for (let i = 0; i < headings.length; i++) {
+            if (visibility.get(headings[i].id)) {
+              activeId = headings[i].id;
+            }
+          }
+
+          tocLinks.forEach(function (l) { l.classList.remove('active'); });
+          if (activeId && linkById.has(activeId)) {
+            linkById.get(activeId).classList.add('active');
+          }
+        }, {
+          // Trigger when a heading is in the top ~30% of the viewport.
+          rootMargin: '0px 0px -70% 0px',
+          threshold: 0,
+        });
+
+        headings.forEach(function (h) { observer.observe(h); });
+      })();
+    </script>
+  {% endif %}
 {% endblock %}

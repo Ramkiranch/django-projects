@@ -378,7 +378,7 @@ class PostDetailTocTests(TestCase):
         )
         response = self.client.get(reverse('post_detail', args=[post.id]))
         body = response.content.decode()
-        self.assertIn('In this post', body)
+        self.assertIn('On this page', body)
         # Markdown's toc extension assigns ids to headings
         self.assertIn('id="first-section"', body)
         self.assertIn('id="second-section"', body)
@@ -386,12 +386,12 @@ class PostDetailTocTests(TestCase):
     def test_toc_sidebar_omitted_when_only_one_h2(self):
         post = self._post_with_body('## Lonely\n\nbody only')
         response = self.client.get(reverse('post_detail', args=[post.id]))
-        self.assertNotContains(response, 'In this post')
+        self.assertNotContains(response, 'On this page')
 
     def test_toc_sidebar_omitted_when_no_headings(self):
         post = self._post_with_body('Just a plain post with no headings.')
         response = self.client.get(reverse('post_detail', args=[post.id]))
-        self.assertNotContains(response, 'In this post')
+        self.assertNotContains(response, 'On this page')
 
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
