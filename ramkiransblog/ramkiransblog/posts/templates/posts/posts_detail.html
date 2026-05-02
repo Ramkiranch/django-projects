@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load markdown_filters %}
 
 {% block title %}{{ post.title }} — Ramkiran's Blog{% endblock %}
 {% block meta_description %}{{ post.summary }}{% endblock %}
@@ -36,28 +35,51 @@
 {% endblock %}
 
 {% block content %}
-  <article class="mx-auto" style="max-width: 760px;">
-    <header class="mb-4">
-      <h1 class="mb-2">{{ post.title }}</h1>
-      <p class="post-meta mb-0">Published {{ post.pub_date_modified }}</p>
-    </header>
+  <div class="row">
 
-    <figure class="post-hero mb-4">
-      <img src="{{ post.image.url }}" alt="{{ post.title }}">
-    </figure>
+    {% if show_toc %}
+      <aside class="col-lg-3 d-none d-lg-block order-lg-1">
+        <nav class="post-toc sticky-top" aria-label="In this post">
+          <h2 class="h6 text-muted text-uppercase fw-semibold mb-2">In this post</h2>
+          {{ toc_html|safe }}
+        </nav>
+      </aside>
+    {% endif %}
 
-    <div class="prose">
-      {{ post.body|markdown }}
-    </div>
+    <article class="col-lg-{% if show_toc %}9{% else %}9 mx-lg-auto{% endif %} order-lg-2 post-article">
+      <header class="mb-4">
+        <h1 class="mb-2">{{ post.title }}</h1>
+        <p class="post-meta mb-0">
+          Published {{ post.pub_date_modified }} &middot; {{ post.read_time }} min read
+        </p>
+      </header>
 
-    {% comment %}
-      The footer signup form (in base.html) already invites readers to
-      subscribe at the end of every page — no need to duplicate that
-      CTA here. Removed in favor of a single, consistent ask.
+      <figure class="post-hero mb-4">
+        <img src="{{ post.image.url }}" alt="{{ post.title }}">
+      </figure>
 
-      Comments disabled — Disqus was surfacing stale threads from the
-      old blog. To re-enable, restore the Comments section and the
-      extra_js Disqus loader from git history (commit 73deefc).
-    {% endcomment %}
-  </article>
+      <div class="prose">
+        {{ body_html|safe }}
+      </div>
+
+      {% if recommended_posts %}
+        <section class="more-posts mt-5 pt-4 border-top">
+          <h2 class="h4 mb-4">More from the blog</h2>
+          <div class="row row-cols-1 row-cols-md-{{ recommended_posts|length }} g-4">
+            {% for rec_post in recommended_posts %}
+              <div class="col">
+                {% include "posts/_post_card.html" with post=rec_post %}
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      {% comment %}
+        Footer signup form (in base.html) handles the subscribe CTA on
+        every page. Comments disabled — see commit 73deefc to revert.
+      {% endcomment %}
+    </article>
+
+  </div>
 {% endblock %}

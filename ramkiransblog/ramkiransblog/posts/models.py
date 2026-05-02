@@ -1,4 +1,12 @@
+import math
+
 from django.db import models
+
+# Avg adult reading speed for technical prose, words/minute. Lower than
+# fiction (~250) because EM/AI posts have headings, lists, and code that
+# slow you down. Tweakable later if Plausible engagement metrics suggest
+# the estimate is off.
+WORDS_PER_MINUTE = 225
 
 
 class Post(models.Model):
@@ -20,6 +28,18 @@ class Post(models.Model):
 
     def pub_date_modified(self):
         return self.pub_date.strftime('%b %e %Y')
+
+    def read_time(self) -> int:
+        """Estimated reading time in minutes (rounded up, min 1).
+
+        Strips Markdown syntax first so '**bold**' counts as one word, not
+        three. Reuses the same strip_markdown helper as summary().
+        """
+        from .templatetags.markdown_filters import strip_markdown
+
+        plain = strip_markdown(self.body or '')
+        words = len(plain.split())
+        return max(1, math.ceil(words / WORDS_PER_MINUTE))
 
     def summary(self):
         """Plain-text preview for cards.

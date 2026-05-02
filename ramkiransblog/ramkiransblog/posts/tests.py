@@ -87,7 +87,9 @@ class PostDetailViewTests(TestCase):
         response = self.client.get(reverse('post_detail', args=[post.id]))
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
-        self.assertIn('<h2>Subheading</h2>', body)
+        # The post-detail view enables Markdown's `toc` extension which
+        # injects id="..." on every heading, so allow either form.
+        self.assertIn('>Subheading</h2>', body)
         self.assertIn('<strong>bold</strong>', body)
         self.assertIn('<em>italic</em>', body)
         self.assertIn('<code>inline code</code>', body)
@@ -319,6 +321,141 @@ class PostDetailNoDuplicateSignupTests(TestCase):
         self.assertNotIn("Liked this? Get notified", body)
         # Footer signup (value="footer") still present — single CTA per page
         self.assertIn('value="footer"', body)
+
+
+class ReadTimeTests(TestCase):
+    """Post.read_time() rounds up at 225 wpm, never below 1 minute,
+    and ignores Markdown syntax characters."""
+
+    def _post(self, body: str) -> Post:
+        return Post(
+            title='rt',
+            pub_date=datetime(2026, 5, 1, tzinfo=timezone.utc),
+            body=body,
+        )
+
+    def test_short_post_returns_one_minute(self):
+        # 5 words → ceil(5/225) = 1
+        self.assertEqual(self._post('one two three four five').read_time(), 1)
+
+    def test_long_post_rounds_up(self):
+        # 500 words → ceil(500/225) = 3
+        body = ' '.join(['word'] * 500)
+        self.assertEqual(self._post(body).read_time(), 3)
+
+    def test_zero_words_returns_one_minute(self):
+        self.assertEqual(self._post('').read_time(), 1)
+
+    def test_strips_markdown_before_counting(self):
+        # Visible words: 'bold italic heading body' = 4 words
+        # Without stripping, we'd also count `**`, `_`, `##` as token noise.
+        body = '**bold** _italic_\n\n## heading\n\nbody'
+        self.assertEqual(self._post(body).read_time(), 1)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class PostDetailReadTimeTests(TestCase):
+    def test_detail_page_shows_min_read(self):
+        post = make_post(0)
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'min read')
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class PostDetailTocTests(TestCase):
+    def _post_with_body(self, body: str) -> Post:
+        return Post.objects.create(
+            title='TOC test',
+            pub_date=datetime(2026, 5, 1, tzinfo=timezone.utc),
+            image=SimpleUploadedFile('toc.png', ONE_PIXEL_PNG, content_type='image/png'),
+            body=body,
+        )
+
+    def test_toc_sidebar_renders_when_two_or_more_h2s(self):
+        post = self._post_with_body(
+            '## First section\n\nfoo\n\n## Second section\n\nbar'
+        )
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body = response.content.decode()
+        self.assertIn('In this post', body)
+        # Markdown's toc extension assigns ids to headings
+        self.assertIn('id="first-section"', body)
+        self.assertIn('id="second-section"', body)
+
+    def test_toc_sidebar_omitted_when_only_one_h2(self):
+        post = self._post_with_body('## Lonely\n\nbody only')
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        self.assertNotContains(response, 'In this post')
+
+    def test_toc_sidebar_omitted_when_no_headings(self):
+        post = self._post_with_body('Just a plain post with no headings.')
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        self.assertNotContains(response, 'In this post')
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class PostDetailRecommendedPostsTests(TestCase):
+    def test_recommendations_show_three_most_recent_other_posts(self):
+        # Create 5 posts, view post 3 — recommendations should be 5/4/2 (newest first, excluding 3)
+        posts = [make_post(i) for i in range(5)]
+        target = posts[2]
+        response = self.client.get(reverse('post_detail', args=[target.id]))
+        body = response.content.decode()
+        # Expected order: idx 4 (newest), idx 3, idx 1
+        i4 = body.find('Post 4')
+        i3 = body.find('Post 3')
+        i1 = body.find('Post 1')
+        self.assertGreater(i4, 0, 'Post 4 should appear in recommendations')
+        self.assertGreater(i3, 0, 'Post 3 should appear in recommendations')
+        self.assertGreater(i1, 0, 'Post 1 should appear in recommendations')
+        # Newest first: Post 4 before Post 3 before Post 1 in the rendered HTML
+        self.assertLess(i4, i3)
+        self.assertLess(i3, i1)
+
+    def test_recommendations_exclude_current_post(self):
+        posts = [make_post(i) for i in range(3)]
+        target = posts[1]
+        response = self.client.get(reverse('post_detail', args=[target.id]))
+        body = response.content.decode()
+        # The current post's title appears in the H1 header — but should NOT
+        # appear inside the "More from the blog" recommendations section.
+        more_idx = body.find('More from the blog')
+        self.assertGreater(more_idx, 0)
+        recs_section = body[more_idx:]
+        self.assertNotIn(f'>{target.title}<', recs_section)
+
+    def test_recommendations_capped_at_three(self):
+        posts = [make_post(i) for i in range(6)]
+        target = posts[0]
+        response = self.client.get(reverse('post_detail', args=[target.id]))
+        body = response.content.decode()
+        # Of 5 other posts, only 3 most recent should appear (5, 4, 3)
+        for visible in ('Post 5', 'Post 4', 'Post 3'):
+            self.assertIn(visible, body)
+        # Older ones should NOT appear in recommendations
+        more_idx = body.find('More from the blog')
+        recs_section = body[more_idx:]
+        self.assertNotIn('Post 2', recs_section)
+        self.assertNotIn('Post 1', recs_section)
+
+    def test_no_recommendations_section_when_only_one_post(self):
+        post = make_post(0)
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        self.assertNotContains(response, 'More from the blog')
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class PostCardPartialTests(TestCase):
+    def test_home_uses_card_partial(self):
+        make_post(0)
+        response = self.client.get(reverse('home'))
+        self.assertTemplateUsed(response, 'posts/_post_card.html')
+
+    def test_detail_uses_card_partial_for_recommendations(self):
+        posts = [make_post(i) for i in range(3)]
+        response = self.client.get(reverse('post_detail', args=[posts[0].id]))
+        self.assertTemplateUsed(response, 'posts/_post_card.html')
 
 
 class MarkdownFilterTests(TestCase):
