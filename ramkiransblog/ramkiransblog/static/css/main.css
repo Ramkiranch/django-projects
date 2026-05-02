@@ -65,9 +65,31 @@ h1, h2, h3, h4 {
   line-height: 1.75;
   max-width: 65ch;
   color: var(--rk-text);
+  /* Justify body copy for a clean right edge. `hyphens: auto` lets the
+     browser break long words at syllable boundaries (the way print
+     justifies) so you don't get awkward "rivers" of stretched word
+     spacing. Both vendor prefixes still needed for older Safari/iOS. */
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  hyphenate-limit-chars: 6 3 3;  /* don't hyphenate words shorter than 6 chars */
 }
 .prose p { margin-bottom: 1.25rem; }
 .prose img { max-width: 100%; border-radius: 0.5rem; }
+
+/* Anything inside .prose that would look odd justified — code blocks,
+   blockquotes, list items, and headings — keeps left-alignment. */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose pre,
+.prose code,
+.prose blockquote,
+.prose li {
+  text-align: left;
+  hyphens: manual;
+}
 
 /* Markdown-rendered elements */
 .prose h2 {
