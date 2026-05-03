@@ -190,7 +190,11 @@ h1, h2, h3, h4 {
   position: relative;
 }
 .post-article {
-  max-width: 760px;
+  /* `ch` unit (width of the "0" character at the current font size) so
+     the reading column stays consistent with .about-page below — both
+     pages now have the same effective right padding regardless of the
+     viewport width. */
+  max-width: 70ch;
   margin: 0 auto;
 }
 .post-toc-rail {

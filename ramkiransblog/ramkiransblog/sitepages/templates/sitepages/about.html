@@ -10,15 +10,31 @@
     <img src="{% static 'sitepages/about.jpg' %}" alt="Ram Chevendra">
   </section>
 
-  <article class="prose mx-auto about-page">
-    <p class="lead">
-      I'm Ram &mdash; a Senior Software Engineering Manager in fintech, based just
-      outside Dallas in Argyle, Texas. By day, I lead engineering teams building
-      financial services systems with a commitment to changing banking for good.
-      By night (and during nap times), I write about what I'm learning along
-      the way.
-    </p>
+  {% comment %}
+    Secondary photo + lead paragraph as a two-column row. The image
+    is sourced from sitepages/about-secondary.jpg — drop a different
+    file at that path to swap.
+  {% endcomment %}
+  <section class="about-secondary mb-5">
+    <div class="row align-items-center g-4 mx-auto" style="max-width: 70ch;">
+      <div class="col-md-5">
+        <img src="{% static 'sitepages/about-secondary.jpg' %}"
+             class="img-fluid rounded shadow-sm"
+             alt="Ram Chevendra">
+      </div>
+      <div class="col-md-7">
+        <p class="lead mb-0">
+          I'm Ram &mdash; a Senior Software Engineering Manager in fintech, based
+          just outside Dallas in Argyle, Texas. By day, I lead engineering teams
+          building financial services systems with a commitment to changing
+          banking for good. By night (and during nap times), I write about what
+          I'm learning along the way.
+        </p>
+      </div>
+    </div>
+  </section>
 
+  <article class="prose mx-auto about-page">
     <h2>What I write about here</h2>
     <p>This blog sits at the intersection of three things I care deeply about:</p>
 
@@ -49,8 +65,8 @@
       <p>
         I'm ambitious and perpetually learning &mdash; always reading,
         experimenting, or chasing the next idea. I'll share what's working, what
-        isn't, and the frameworks I'm using to think about career growth,
-        financial independence, and staying technical as a leader.
+        isn't, and the frameworks I'm using to think about career growth and
+        staying technical as a leader.
       </p>
     </section>
 
