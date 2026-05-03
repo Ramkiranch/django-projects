@@ -1,0 +1,43 @@
+{% load static %}
+{% comment %}
+  Author-card subscribe partial — shown at the foot of every post detail.
+  Wraps the same `subscribe` view + honeypot + signed-token flow as the
+  footer signup partial; only the visual shell differs.
+{% endcomment %}
+<aside class="subs-author">
+  <div class="avatar">
+    <img src="{% static 'sitepages/ram-photo.jpg' %}" alt="Ram Chevendra">
+  </div>
+  <div>
+    <span class="name">Ram Chevendra</span>
+    <span class="role">Senior Software Engineering Manager &middot; Fintech</span>
+    <p class="bio">
+      I write about engineering leadership, agentic AI in the enterprise,
+      and the craft of staying technical as a leader.
+    </p>
+    <p class="pitch">Get new posts in your inbox &mdash; no spam, unsubscribe any time.</p>
+
+    <form method="post" action="{% url 'subscribe' %}" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="source" value="post-end">
+      {# Honeypot — hidden via .d-none, bots fill it and we drop the row. #}
+      <div class="d-none" aria-hidden="true">
+        <label>Leave this field blank
+          <input type="text" name="website" tabindex="-1" autocomplete="off">
+        </label>
+      </div>
+      <div class="form-row">
+        <input
+          type="email"
+          name="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+          aria-label="Email address"
+          required>
+        <button class="btn-ink" type="submit">Subscribe</button>
+      </div>
+    </form>
+
+    <p class="fine">Occasional posts, no spam, unsubscribe any time.</p>
+  </div>
+</aside>

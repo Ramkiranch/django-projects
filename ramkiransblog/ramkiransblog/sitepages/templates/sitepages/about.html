@@ -67,9 +67,44 @@
       shift, a senior engineer eyeing leadership, or someone building in fintech
       &mdash; I'd love to hear from you.
     </p>
+  </article>
 
+  {# Inverted dark CTA — full-width signup at the bottom of the about page. #}
+  <section class="subs-about-prominent" aria-label="Subscribe">
+    <div>
+      <p class="label">Stay in the loop</p>
+      <h2>Notes from the field, <em>once a month</em>.</h2>
+      <p>
+        Posts on engineering leadership and AI in the enterprise &mdash; written
+        from the trenches of building real systems. Free, no spam, unsubscribe
+        any time.
+      </p>
+    </div>
+    <div>
+      <form method="post" action="{% url 'subscribe' %}" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="source" value="about">
+        <div class="d-none" aria-hidden="true">
+          <label>Leave this field blank
+            <input type="text" name="website" tabindex="-1" autocomplete="off">
+          </label>
+        </div>
+        <div class="form-row">
+          <input
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            aria-label="Email address"
+            required>
+          <button class="btn" type="submit">Subscribe</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <article class="prose mx-auto about-page" style="margin-top: 24px;">
     <hr>
-
     <p class="disclaimer">
       All views and opinions expressed on this blog are my own and do not reflect
       the views of any past or present employer.

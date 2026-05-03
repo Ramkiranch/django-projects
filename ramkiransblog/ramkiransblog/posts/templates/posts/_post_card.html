@@ -1,22 +1,18 @@
 {% comment %}
-  Renders one Post as a Bootstrap card.
+  Renders one Post as the new editorial post-card (220px thumb + content).
   Used by:
-    - posts/home.html (post grid)
+    - posts/home.html (post listing)
     - posts/posts_detail.html ("More from the blog" recommendations)
   Caller must pass `post` in the include context.
 {% endcomment %}
-<article class="card post-card h-100">
-  <a href="{% url 'post_detail' post.id %}" aria-label="{{ post.title }}">
-    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+<article class="post-card">
+  <a class="post-card-thumb" href="{% url 'post_detail' post.id %}" aria-label="{{ post.title }}">
+    <img src="{{ post.image.url }}" alt="{{ post.title }}">
   </a>
-  <div class="card-body d-flex flex-column">
-    <h3 class="h5 card-title">
-      <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-    </h3>
-    <p class="text-muted small mb-2">{{ post.pub_date_modified }}</p>
-    <p class="card-text">{{ post.summary }}&hellip;</p>
-    <a href="{% url 'post_detail' post.id %}" class="mt-auto small text-decoration-none">
-      Read more &rarr;
-    </a>
+  <div class="post-card-body">
+    <p class="post-card-meta">{{ post.pub_date_modified }} &middot; {{ post.read_time }} min read</p>
+    <h3><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h3>
+    <p>{{ post.summary }}&hellip;</p>
+    <a class="read-more" href="{% url 'post_detail' post.id %}">Read more &rarr;</a>
   </div>
 </article>
