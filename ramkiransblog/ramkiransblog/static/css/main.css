@@ -190,11 +190,13 @@ h1, h2, h3, h4 {
   position: relative;
 }
 .post-article {
-  /* `ch` unit (width of the "0" character at the current font size) so
-     the reading column stays consistent with .about-page below — both
-     pages now have the same effective right padding regardless of the
-     viewport width. */
-  max-width: 70ch;
+  /* `ch` unit (width of the "0" character at the current font size).
+     Set wider than the about page (70ch) so the article uses more of
+     the empty horizontal space when the TOC rail is present at xl+.
+     80ch leaves a comfortable ~40px gap to the (170px) TOC rail at
+     1200px viewport while keeping line-length inside the readable
+     ~50-90ch range for technical prose. */
+  max-width: 80ch;
   margin: 0 auto;
 }
 /* Override the global .prose max-width: 65ch when prose is inside
