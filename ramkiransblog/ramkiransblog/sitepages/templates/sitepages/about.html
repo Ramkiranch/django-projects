@@ -10,86 +10,69 @@
     <img src="{% static 'sitepages/about.jpg' %}" alt="Ram Chevendra">
   </section>
 
-  {% comment %}
-    Two-column layout: smaller secondary photo (col-md-3) on the left,
-    ENTIRE article on the right (col-md-9) with its existing max-width:
-    70ch preserved — so reading width and right padding are unchanged
-    from the previous standalone-article layout. The photo column is
-    deliberately narrow so the article remains the visual focus.
-    On mobile (<md) the columns stack: photo above article.
-    Image: sitepages/about-secondary.jpg (swap the file to change).
-  {% endcomment %}
-  <div class="row g-4 g-md-5 mx-auto about-row" style="max-width: 920px;">
-    <div class="col-md-3">
-      <img src="{% static 'sitepages/about-secondary.jpg' %}"
-           class="img-fluid rounded shadow-sm about-secondary-img"
-           alt="Ram Chevendra">
-    </div>
+  <article class="prose mx-auto about-page">
+    <p class="lead">
+      I'm Ram Chevendra &mdash; a Senior Software Engineering Manager in fintech,
+      based just outside Dallas in Argyle, Texas. By day, I lead engineering teams
+      building financial services systems with a commitment to changing
+      banking for good. By night (and during nap times), I write about what
+      I'm learning along the way.
+    </p>
 
-    <article class="col-md-9 prose mx-auto about-page">
-      <p class="lead">
-        I'm Ram Chevendra &mdash; a Senior Software Engineering Manager in fintech,
-        based just outside Dallas in Argyle, Texas. By day, I lead engineering teams
-        building financial services systems with a commitment to changing
-        banking for good. By night (and during nap times), I write about what
-        I'm learning along the way.
-      </p>
+    <h2>What I write about here</h2>
+    <p>This blog sits at the intersection of three things I care deeply about:</p>
 
-      <h2>What I write about here</h2>
-      <p>This blog sits at the intersection of three things I care deeply about:</p>
-
-      <section class="topic">
-        <h3>Engineering leadership</h3>
-        <p>
-          I write about the craft of managing engineers &mdash; team topology,
-          technical decision-making, coaching, and the messy human parts of the job
-          that no framework fully captures. Fintech shapes how I think about
-          tradeoffs, but the lessons travel.
-        </p>
-      </section>
-
-      <section class="topic">
-        <h3>AI in the enterprise</h3>
-        <p>
-          I'm endlessly curious about how agentic AI, RAG architectures, and MCP are
-          reshaping engineering work &mdash; and what it actually takes to deploy any
-          of this usefully inside a large organization. Expect posts on subagent
-          patterns, PII detection pipelines, document processing with Textract and
-          embeddings, and the realities of evaluating LLM systems when quality
-          really matters.
-        </p>
-      </section>
-
-      <section class="topic">
-        <h3>The long game</h3>
-        <p>
-          I'm ambitious and perpetually learning &mdash; always reading,
-          experimenting, or chasing the next idea. I'll share what's working, what
-          isn't, and the frameworks I'm using to think about career growth and
-          staying technical as a leader.
-        </p>
-      </section>
-
-      <h2>Off the clock</h2>
+    <section class="topic">
+      <h3>Engineering leadership</h3>
       <p>
-        I'm a husband and dad to a toddler and an infant &mdash; which means most of
-        my "free time" happens before 6&nbsp;AM or after bedtime. I run half
-        marathons (five down, chasing a sub-2:00) and have recently gotten curious
-        about golf.
+        I write about the craft of managing engineers &mdash; team topology,
+        technical decision-making, coaching, and the messy human parts of the job
+        that no framework fully captures. Fintech shapes how I think about
+        tradeoffs, but the lessons travel.
       </p>
+    </section>
 
-      <p class="cta">
-        If any of this resonates &mdash; whether you're an EM navigating the AI
-        shift, a senior engineer eyeing leadership, or someone building in fintech
-        &mdash; I'd love to hear from you.
+    <section class="topic">
+      <h3>AI in the enterprise</h3>
+      <p>
+        I'm endlessly curious about how agentic AI, RAG architectures, and MCP are
+        reshaping engineering work &mdash; and what it actually takes to deploy any
+        of this usefully inside a large organization. Expect posts on subagent
+        patterns, PII detection pipelines, document processing with Textract and
+        embeddings, and the realities of evaluating LLM systems when quality
+        really matters.
       </p>
+    </section>
 
-      <hr>
-
-      <p class="disclaimer">
-        All views and opinions expressed on this blog are my own and do not reflect
-        the views of any past or present employer.
+    <section class="topic">
+      <h3>The long game</h3>
+      <p>
+        I'm ambitious and perpetually learning &mdash; always reading,
+        experimenting, or chasing the next idea. I'll share what's working, what
+        isn't, and the frameworks I'm using to think about career growth and
+        staying technical as a leader.
       </p>
-    </article>
-  </div>
+    </section>
+
+    <h2>Off the clock</h2>
+    <p>
+      I'm a husband and dad to a toddler and an infant &mdash; which means most of
+      my "free time" happens before 6&nbsp;AM or after bedtime. I run half
+      marathons (five down, chasing a sub-2:00) and have recently gotten curious
+      about golf.
+    </p>
+
+    <p class="cta">
+      If any of this resonates &mdash; whether you're an EM navigating the AI
+      shift, a senior engineer eyeing leadership, or someone building in fintech
+      &mdash; I'd love to hear from you.
+    </p>
+
+    <hr>
+
+    <p class="disclaimer">
+      All views and opinions expressed on this blog are my own and do not reflect
+      the views of any past or present employer.
+    </p>
+  </article>
 {% endblock %}
