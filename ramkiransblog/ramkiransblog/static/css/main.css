@@ -197,6 +197,13 @@ h1, h2, h3, h4 {
   max-width: 70ch;
   margin: 0 auto;
 }
+/* Override the global .prose max-width: 65ch when prose is inside
+   .post-article. The article wrapper already constrains width to 70ch;
+   without this override the body text would render even narrower than
+   the title/hero/recommendations above it (asymmetric right padding). */
+.post-article .prose {
+  max-width: none;
+}
 .post-toc-rail {
   position: absolute;
   top: 0;
