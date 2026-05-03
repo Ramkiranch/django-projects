@@ -4,35 +4,46 @@
 {% block title %}Ramkiran's Blog — Latest Posts{% endblock %}
 
 {% block content %}
-  <section class="hero">
-    <h1>Welcome to Ramkiran's Blog</h1>
-    <img src="{% static 'posts/home.jpg' %}" alt="Ramkiran's blog hero">
+  <section class="hero-safe">
+    <div class="text">
+      <p class="kicker">Engineering leadership &middot; AI &middot; the long game</p>
+      <h1>Notes from a fintech EM building in the AI shift.</h1>
+      <p>
+        By Ram Chevendra &mdash; Senior Software Engineering Manager. I write about
+        engineering leadership, agentic AI in the enterprise, and the craft of
+        staying technical as a leader.
+      </p>
+      <div class="meta-row">
+        <span>Argyle, TX</span>
+        <span>&middot;</span>
+        <span>{{ page_obj.paginator.count }} post{{ page_obj.paginator.count|pluralize }}</span>
+      </div>
+    </div>
+    <div class="photo">
+      <img src="{% static 'sitepages/ram-photo.jpg' %}" alt="Ram Chevendra">
+    </div>
   </section>
 
   <section>
-    <div class="d-flex align-items-baseline justify-content-between mb-4">
-      <h2 class="mb-0">Latest posts</h2>
+    <div class="posts-header">
+      <h2>Latest posts</h2>
       {% if page_obj.paginator.count %}
-        <span class="text-muted small">
+        <span class="posts-count">
           {{ page_obj.paginator.count }} post{{ page_obj.paginator.count|pluralize }}
         </span>
       {% endif %}
     </div>
 
     {% if page_obj %}
-      <div class="row row-cols-1 row-cols-md-2 g-4">
-        {% for post in page_obj %}
-          <div class="col">
-            {% include "posts/_post_card.html" with post=post %}
-          </div>
-        {% endfor %}
-      </div>
+      {% for post in page_obj %}
+        {% include "posts/_post_card.html" with post=post %}
+      {% endfor %}
     {% else %}
-      <p class="text-muted">No posts yet — check back soon.</p>
+      <p style="color: var(--muted);">No posts yet — check back soon.</p>
     {% endif %}
 
     {% if page_obj.paginator.num_pages > 1 %}
-      <nav aria-label="Posts pagination" class="mt-5">
+      <nav aria-label="Posts pagination" style="margin-top: 48px;">
         <ul class="pagination justify-content-center">
           <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
             <a class="page-link"

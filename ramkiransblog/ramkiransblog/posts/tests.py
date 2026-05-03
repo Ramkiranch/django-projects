@@ -303,11 +303,13 @@ class PostSummaryTests(TestCase):
 
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
-class PostDetailNoDuplicateSignupTests(TestCase):
-    """The post-end signup CTA was removed in favor of the single footer
-    form — verify it doesn't render on post detail anymore."""
+class PostDetailSignupSlotsTests(TestCase):
+    """The May 2026 redesign reintroduces a post-end signup — but as
+    the new "author card" pattern (photo + bio + form), not the earlier
+    plain "Liked this?" aside that was removed in PR #16. Both the
+    author card and the footer form should render."""
 
-    def test_no_post_end_signup_section_on_detail(self):
+    def test_post_end_uses_author_card_not_old_aside(self):
         post = Post.objects.create(
             title='Test',
             pub_date=datetime(2026, 5, 1, tzinfo=timezone.utc),
@@ -316,10 +318,12 @@ class PostDetailNoDuplicateSignupTests(TestCase):
         )
         response = self.client.get(reverse('post_detail', args=[post.id]))
         body = response.content.decode()
-        # The post-end signup used <input name="source" value="post-end"> — verify gone
-        self.assertNotIn('value="post-end"', body)
+        # New author-card pattern present (with hidden source=post-end)
+        self.assertIn('class="subs-author"', body)
+        self.assertIn('value="post-end"', body)
+        # Old "Liked this? Get notified" aside copy must NOT be back
         self.assertNotIn("Liked this? Get notified", body)
-        # Footer signup (value="footer") still present — single CTA per page
+        # Footer signup (value="footer") still present — both forms render
         self.assertIn('value="footer"', body)
 
 
@@ -456,6 +460,43 @@ class PostCardPartialTests(TestCase):
         posts = [make_post(i) for i in range(3)]
         response = self.client.get(reverse('post_detail', args=[posts[0].id]))
         self.assertTemplateUsed(response, 'posts/_post_card.html')
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class RedesignSmokeTests(TestCase):
+    """Smoke tests for the May 2026 visual refresh — assert the new
+    design's distinctive class names and font loader appear in rendered
+    HTML so a regression to the prior Bootstrap-only template gets caught."""
+
+    def test_base_loads_google_fonts(self):
+        response = self.client.get(reverse('home'))
+        body = response.content.decode()
+        self.assertIn('fonts.googleapis.com/css2?family=Lora', body)
+        self.assertIn('Source+Sans+3', body)
+
+    def test_home_uses_hero_safe(self):
+        response = self.client.get(reverse('home'))
+        self.assertContains(response, 'class="hero-safe"')
+
+    def test_home_uses_new_post_card_class(self):
+        make_post(0)
+        response = self.client.get(reverse('home'))
+        body = response.content.decode()
+        self.assertIn('class="post-card"', body)
+        self.assertIn('post-card-thumb', body)
+
+    def test_post_detail_uses_post_layout_grid(self):
+        post = make_post(0)
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        self.assertContains(response, 'class="post-layout"')
+
+    def test_post_detail_includes_author_card(self):
+        post = make_post(0)
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body = response.content.decode()
+        self.assertIn('class="subs-author"', body)
+        # Form action still points at the existing subscribe view
+        self.assertIn('/subscribe/', body)
 
 
 class MarkdownFilterTests(TestCase):

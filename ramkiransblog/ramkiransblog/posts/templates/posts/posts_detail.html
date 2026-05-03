@@ -35,63 +35,42 @@
 {% endblock %}
 
 {% block content %}
-  {% comment %}
-    Layout: the article is ALWAYS centered (max-width 760px, mx-auto)
-    regardless of whether the TOC is shown. The TOC, when present,
-    is absolutely positioned in the left gutter (above xl breakpoint
-    only — there isn't enough room at smaller widths). This keeps the
-    reading column visually anchored to the page center; the TOC reads
-    as supplementary info in the margin, not as a layout-shifting column.
-  {% endcomment %}
-  <div class="post-detail-layout">
+  <div class="post-layout">
 
     {% if show_toc %}
-      <div class="post-toc-rail d-none d-xl-block">
-        <nav class="post-toc" aria-label="In this post">
-          <p class="text-muted text-uppercase fw-semibold mb-2"
-             style="font-size: 0.7rem; letter-spacing: 0.08em;">
-            On this page
-          </p>
-          {{ toc_html|safe }}
-        </nav>
-      </div>
+      <aside class="post-toc" aria-label="On this page">
+        <p class="toc-label">On this page</p>
+        {{ toc_html|safe }}
+      </aside>
     {% endif %}
 
-    <article class="post-article">
-      <header class="mb-4">
-        <h1 class="mb-2">{{ post.title }}</h1>
-        <p class="post-meta mb-0">
-          Published {{ post.pub_date_modified }} &middot; {{ post.read_time }} min read
-        </p>
+    <article class="post-main">
+      <header class="post-hero">
+        <p class="meta">Published {{ post.pub_date_modified }} &middot; {{ post.read_time }} min read</p>
+        <h1>{{ post.title }}</h1>
       </header>
 
-      <figure class="post-hero mb-4">
+      <figure class="post-cover">
         <img src="{{ post.image.url }}" alt="{{ post.title }}">
       </figure>
 
-      <div class="prose">
+      <div class="post-body">
         {{ body_html|safe }}
       </div>
 
+      {% include "subscribers/_author_card.html" %}
+
       {% if recommended_posts %}
-        <section class="more-posts mt-5 pt-4 border-top">
-          <h2 class="h4 mb-4">More from the blog</h2>
-          <div class="row row-cols-1 row-cols-md-{{ recommended_posts|length }} g-4">
-            {% for rec_post in recommended_posts %}
-              <div class="col">
-                {% include "posts/_post_card.html" with post=rec_post %}
-              </div>
-            {% endfor %}
-          </div>
+        <section class="more-posts" style="margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line);">
+          <h2 style="font-size: 1.6rem; margin: 0 0 28px;">More from the blog</h2>
+          {% for rec_post in recommended_posts %}
+            {% include "posts/_post_card.html" with post=rec_post %}
+          {% endfor %}
         </section>
       {% endif %}
-
-      {% comment %}
-        Footer signup form (in base.html) handles the subscribe CTA on
-        every page. Comments disabled — see commit 73deefc to revert.
-      {% endcomment %}
     </article>
 
+    <div class="post-rail-spacer"></div>
   </div>
 {% endblock %}
 
@@ -99,8 +78,8 @@
   {% if show_toc %}
     <script>
       // Active-section progress rail: highlight the TOC link whose heading
-      // is currently visible (closest to the top of the viewport). Pure
-      // IntersectionObserver — no scroll-event listener, no jQuery. ~30 LOC.
+      // is closest to the top of the viewport. Pure IntersectionObserver,
+      // no scroll-event listeners.
       (function () {
         const tocLinks = document.querySelectorAll('.post-toc .toc a[href^="#"]');
         if (!tocLinks.length) return;
@@ -118,8 +97,6 @@
 
         if (!headings.length) return;
 
-        // Track which headings are above the trigger line so we can pick
-        // the lowest one (= the section the reader is currently in).
         const visibility = new Map();
         const observer = new IntersectionObserver(function (entries) {
           entries.forEach(function (e) {
@@ -133,12 +110,11 @@
             }
           }
 
-          tocLinks.forEach(function (l) { l.classList.remove('active'); });
+          tocLinks.forEach(function (l) { l.classList.remove('is-active', 'active'); });
           if (activeId && linkById.has(activeId)) {
-            linkById.get(activeId).classList.add('active');
+            linkById.get(activeId).classList.add('is-active');
           }
         }, {
-          // Trigger when a heading is in the top ~30% of the viewport.
           rootMargin: '0px 0px -70% 0px',
           threshold: 0,
         });
