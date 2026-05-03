@@ -11,84 +11,83 @@
   </section>
 
   {% comment %}
-    Secondary photo + lead paragraph as a two-column row. The image
-    is sourced from sitepages/about-secondary.jpg — drop a different
-    file at that path to swap.
+    Two-column layout: secondary photo on the left, ALL article content
+    on the right (lead + topics + off-the-clock + CTA + disclaimer). On
+    mobile (<md) the columns stack — photo above content.
+    Image source: sitepages/about-secondary.jpg (drop a different file
+    at that path to swap).
   {% endcomment %}
-  <section class="about-secondary mb-5">
-    <div class="row align-items-center g-4 mx-auto" style="max-width: 70ch;">
-      <div class="col-md-5">
-        <img src="{% static 'sitepages/about-secondary.jpg' %}"
-             class="img-fluid rounded shadow-sm"
-             alt="Ram Chevendra">
-      </div>
-      <div class="col-md-7">
-        <p class="lead mb-0">
-          I'm Ram Chevendra &mdash; a Senior Software Engineering Manager in fintech, based
-          just outside Dallas in Argyle, Texas. By day, I lead engineering teams
-          building financial services systems with a commitment to changing
-          banking for good. By night (and during nap times), I write about what
-          I'm learning along the way.
-        </p>
-      </div>
+  <div class="row g-4 g-md-5 mx-auto about-row" style="max-width: 960px;">
+    <div class="col-md-4">
+      <img src="{% static 'sitepages/about-secondary.jpg' %}"
+           class="img-fluid rounded shadow-sm about-secondary-img"
+           alt="Ram Chevendra">
     </div>
-  </section>
 
-  <article class="prose mx-auto about-page">
-    <h2>What I write about here</h2>
-    <p>This blog sits at the intersection of three things I care deeply about:</p>
-
-    <section class="topic">
-      <h3>Engineering leadership</h3>
-      <p>
-        I write about the craft of managing engineers &mdash; team topology,
-        technical decision-making, coaching, and the messy human parts of the job
-        that no framework fully captures. Fintech shapes how I think about
-        tradeoffs, but the lessons travel.
+    <article class="col-md-8 prose about-page">
+      <p class="lead">
+        I'm Ram Chevendra &mdash; a Senior Software Engineering Manager in fintech,
+        based just outside Dallas in Argyle, Texas. By day, I lead engineering teams
+        building financial services systems with a commitment to changing
+        banking for good. By night (and during nap times), I write about what
+        I'm learning along the way.
       </p>
-    </section>
 
-    <section class="topic">
-      <h3>AI in the enterprise</h3>
+      <h2>What I write about here</h2>
+      <p>This blog sits at the intersection of three things I care deeply about:</p>
+
+      <section class="topic">
+        <h3>Engineering leadership</h3>
+        <p>
+          I write about the craft of managing engineers &mdash; team topology,
+          technical decision-making, coaching, and the messy human parts of the job
+          that no framework fully captures. Fintech shapes how I think about
+          tradeoffs, but the lessons travel.
+        </p>
+      </section>
+
+      <section class="topic">
+        <h3>AI in the enterprise</h3>
+        <p>
+          I'm endlessly curious about how agentic AI, RAG architectures, and MCP are
+          reshaping engineering work &mdash; and what it actually takes to deploy any
+          of this usefully inside a large organization. Expect posts on subagent
+          patterns, PII detection pipelines, document processing with Textract and
+          embeddings, and the realities of evaluating LLM systems when quality
+          really matters.
+        </p>
+      </section>
+
+      <section class="topic">
+        <h3>The long game</h3>
+        <p>
+          I'm ambitious and perpetually learning &mdash; always reading,
+          experimenting, or chasing the next idea. I'll share what's working, what
+          isn't, and the frameworks I'm using to think about career growth and
+          staying technical as a leader.
+        </p>
+      </section>
+
+      <h2>Off the clock</h2>
       <p>
-        I'm endlessly curious about how agentic AI, RAG architectures, and MCP are
-        reshaping engineering work &mdash; and what it actually takes to deploy any
-        of this usefully inside a large organization. Expect posts on subagent
-        patterns, PII detection pipelines, document processing with Textract and
-        embeddings, and the realities of evaluating LLM systems when quality
-        really matters.
+        I'm a husband and dad to a toddler and an infant &mdash; which means most of
+        my "free time" happens before 6&nbsp;AM or after bedtime. I run half
+        marathons (five down, chasing a sub-2:00) and have recently gotten curious
+        about golf.
       </p>
-    </section>
 
-    <section class="topic">
-      <h3>The long game</h3>
-      <p>
-        I'm ambitious and perpetually learning &mdash; always reading,
-        experimenting, or chasing the next idea. I'll share what's working, what
-        isn't, and the frameworks I'm using to think about career growth and
-        staying technical as a leader.
+      <p class="cta">
+        If any of this resonates &mdash; whether you're an EM navigating the AI
+        shift, a senior engineer eyeing leadership, or someone building in fintech
+        &mdash; I'd love to hear from you.
       </p>
-    </section>
 
-    <h2>Off the clock</h2>
-    <p>
-      I'm a husband and dad to a toddler and an infant &mdash; which means most of
-      my "free time" happens before 6&nbsp;AM or after bedtime. I run half
-      marathons (five down, chasing a sub-2:00) and have recently gotten curious
-      about golf.
-    </p>
+      <hr>
 
-    <p class="cta">
-      If any of this resonates &mdash; whether you're an EM navigating the AI
-      shift, a senior engineer eyeing leadership, or someone building in fintech
-      &mdash; I'd love to hear from you.
-    </p>
-
-    <hr>
-
-    <p class="disclaimer">
-      All views and opinions expressed on this blog are my own and do not reflect
-      the views of any past or present employer.
-    </p>
-  </article>
+      <p class="disclaimer">
+        All views and opinions expressed on this blog are my own and do not reflect
+        the views of any past or present employer.
+      </p>
+    </article>
+  </div>
 {% endblock %}
