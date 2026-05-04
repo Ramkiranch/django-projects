@@ -35,20 +35,29 @@ class HomeViewTests(TestCase):
         self.assertTemplateUsed(response, 'posts/home.html')
         self.assertTemplateUsed(response, 'base.html')
 
-    def test_home_paginates_when_more_than_ten_posts(self):
-        for i in range(12):
+    def test_home_paginates_at_posts_per_page_limit(self):
+        # Reference the constant directly so pagination size changes flow through
+        from posts.views import POSTS_PER_PAGE
+
+        # Create POSTS_PER_PAGE + 2 so we get exactly 2 pages with the
+        # second page partially full.
+        for i in range(POSTS_PER_PAGE + 2):
             make_post(i)
+
         response = self.client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
         page_obj = response.context['page_obj']
-        self.assertEqual(len(page_obj.object_list), 10)
+        self.assertEqual(len(page_obj.object_list), POSTS_PER_PAGE)
         self.assertEqual(page_obj.paginator.num_pages, 2)
 
     def test_home_second_page_returns_remaining_posts(self):
-        for i in range(12):
+        from posts.views import POSTS_PER_PAGE
+
+        for i in range(POSTS_PER_PAGE + 2):
             make_post(i)
         response = self.client.get(reverse('home') + '?page=2')
         self.assertEqual(response.status_code, 200)
+        # Second page has the remainder (2 posts beyond the first POSTS_PER_PAGE)
         self.assertEqual(len(response.context['page_obj'].object_list), 2)
 
 

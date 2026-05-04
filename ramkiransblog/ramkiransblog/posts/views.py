@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render
 
 from .models import Post
 
-POSTS_PER_PAGE = 10
+POSTS_PER_PAGE = 5
 RECOMMENDED_COUNT = 3
 # Min number of H2 headings before we render the TOC sidebar. Posts with
 # 0 or 1 sections don't need (and look odd with) a navigation sidebar.
