@@ -1,3 +1,7 @@
+import html as html_lib
+import re
+import unicodedata
+
 import markdown
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
@@ -14,6 +18,41 @@ TOC_MIN_H2 = 2
 # `|markdown` template filter uses, plus `toc` to populate
 # Markdown.toc / Markdown.toc_tokens for the sidebar.
 _POST_DETAIL_EXTENSIONS = ['extra', 'sane_lists', 'smarty', 'toc']
+
+
+# Authors often write `# Title` at the top of their markdown body even
+# though Post.title is already rendered as the page <h1> in the post
+# hero. Without this strip the page shows the title twice (once as the
+# big hero h1, once as a giant body h1).
+_LEADING_H1_RE = re.compile(r'\s*<h1[^>]*>(.*?)</h1>\s*', re.DOTALL)
+
+
+def _normalize_for_title_match(s: str) -> str:
+    """Aggressive normalization so 'multi-agentic' matches 'multi agentic',
+    'What's' matches 'What’s', etc. Strips HTML tags, decodes entities,
+    folds smart-typography back to ASCII, lowercases, collapses whitespace,
+    drops punctuation."""
+    s = re.sub(r'<[^>]+>', '', s)             # strip nested tags
+    s = html_lib.unescape(s)                  # &amp; → &, &lcub; → {, etc.
+    s = unicodedata.normalize('NFKD', s)
+    s = s.replace('’', "'").replace('‘', "'")
+    s = s.replace('“', '"').replace('”', '"')
+    s = s.replace('—', '-').replace('–', '-')
+    s = re.sub(r'[^\w\s]', ' ', s)            # strip punctuation
+    s = re.sub(r'\s+', ' ', s).strip().lower()
+    return s
+
+
+def _strip_leading_title_h1(body_html: str, title: str) -> str:
+    """If body_html begins with an <h1> whose text (normalized) matches
+    the post title, drop that h1. Avoids the duplicate-title visual bug.
+    """
+    m = _LEADING_H1_RE.match(body_html)
+    if not m:
+        return body_html
+    if _normalize_for_title_match(m.group(1)) == _normalize_for_title_match(title):
+        return body_html[m.end():]
+    return body_html
 
 
 def home(request):
@@ -43,6 +82,7 @@ def post_details(request, post_id):
         output_format='html5',
     )
     body_html = md.convert(post.body or '')
+    body_html = _strip_leading_title_h1(body_html, post.title)
     h2_count = sum(1 for tok in md.toc_tokens if tok.get('level') == 2)
     show_toc = h2_count >= TOC_MIN_H2
 

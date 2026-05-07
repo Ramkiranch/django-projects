@@ -1,3 +1,4 @@
+import re
 import tempfile
 from datetime import datetime, timedelta, timezone
 
@@ -556,6 +557,74 @@ class MermaidDiagramTests(TestCase):
         # later swap each <pre> for an inline SVG client-side)
         self.assertIn('flowchart LR', body_html)
         self.assertIn('sequenceDiagram', body_html)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class StripDuplicateTitleH1Tests(TestCase):
+    """Authors often write `# Title` at the top of their markdown body
+    even though Post.title already renders as the page <h1> in the
+    post-hero. The view strips a leading body <h1> when its (normalized)
+    text matches the post title."""
+
+    def _post(self, title: str, body: str) -> Post:
+        return Post.objects.create(
+            title=title,
+            pub_date=datetime(2026, 5, 1, tzinfo=timezone.utc),
+            image=SimpleUploadedFile('h.png', ONE_PIXEL_PNG, content_type='image/png'),
+            body=body,
+        )
+
+    def test_strips_leading_h1_matching_title(self):
+        post = self._post('Hello world', '# Hello world\n\nBody paragraph.')
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body_html = response.content.decode()
+        # Single <h1> on the page (the post-hero one); the body's leading h1 is gone
+        # Find the post-body section and confirm it has NO <h1>
+        post_body_match = re.search(
+            r'<div class="post-body">(.*?)</div>\s*<aside',
+            body_html, re.DOTALL,
+        )
+        self.assertIsNotNone(post_body_match)
+        self.assertNotIn('<h1', post_body_match.group(1))
+
+    def test_strips_when_title_uses_different_hyphens(self):
+        # Real-world case from post 7: title uses "multi agentic", body
+        # uses "multi-agentic" — normalized comparison should still match.
+        post = self._post(
+            'Synapse: A multi agentic summarizer',
+            '# Synapse: A multi-agentic summarizer\n\nBody.',
+        )
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        post_body = re.search(
+            r'<div class="post-body">(.*?)</div>\s*<aside',
+            response.content.decode(), re.DOTALL,
+        ).group(1)
+        self.assertNotIn('<h1', post_body)
+
+    def test_strips_when_smarty_curls_apostrophe(self):
+        # smarty extension converts ' to ’; the strip should still match.
+        post = self._post("What's next", "# What's next\n\nBody.")
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        post_body = re.search(
+            r'<div class="post-body">(.*?)</div>\s*<aside',
+            response.content.decode(), re.DOTALL,
+        ).group(1)
+        self.assertNotIn('<h1', post_body)
+
+    def test_keeps_leading_h1_not_matching_title(self):
+        # Author intentionally puts a different h1 at the top
+        post = self._post('Real title', '# Some other heading\n\nBody.')
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        post_body = re.search(
+            r'<div class="post-body">(.*?)</div>\s*<aside',
+            response.content.decode(), re.DOTALL,
+        ).group(1)
+        self.assertIn('Some other heading', post_body)
+
+    def test_no_h1_in_body_is_a_noop(self):
+        post = self._post('Plain', 'Just a body paragraph, no h1.')
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        self.assertEqual(response.status_code, 200)
 
 
 class MarkdownFilterTests(TestCase):
