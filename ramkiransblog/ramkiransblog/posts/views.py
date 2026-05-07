@@ -77,8 +77,17 @@ def post_details(request, post_id):
     # after conversion. This is the only place we need TOC info; the
     # |markdown template filter and the RSS feed continue to use the
     # simpler module-level function.
+    # toc_depth='2-6' tells the toc extension to skip H1 entirely. Authors
+    # often write `# Title` at the top of the body even though Post.title
+    # already renders as the page H1; without this the H1 becomes the root
+    # of the toc tree and all H2s nest under it as children. Two bad effects:
+    # (1) `sum(... level == 2)` over the top-level tokens counts 0 H2s and
+    # `show_toc` evaluates to False (the TOC sidebar disappears),
+    # (2) the rendered TOC sidebar shows the post title as a top-level entry
+    # with sections indented underneath, which doesn't match other posts.
     md = markdown.Markdown(
         extensions=_POST_DETAIL_EXTENSIONS,
+        extension_configs={'toc': {'toc_depth': '2-6'}},
         output_format='html5',
     )
     body_html = md.convert(post.body or '')

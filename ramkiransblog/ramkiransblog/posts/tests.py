@@ -407,6 +407,27 @@ class PostDetailTocTests(TestCase):
         response = self.client.get(reverse('post_detail', args=[post.id]))
         self.assertNotContains(response, 'On this page')
 
+    def test_toc_sidebar_renders_when_body_starts_with_leading_h1(self):
+        # Regression: post 7 (Synapse) had `# Title` at the top of its
+        # body followed by 8 `## Sections`. Markdown's toc extension nested
+        # the H2s as CHILDREN of the H1 in toc_tokens, so the top-level
+        # H2 count was 0 → show_toc evaluated to False → the TOC sidebar
+        # was hidden even though the post had 8 sections. Configuring
+        # `toc_depth='2-6'` makes the toc extension skip H1 entirely.
+        post = self._post_with_body(
+            '# Page title\n\nintro paragraph.\n\n'
+            '## First section\n\nfoo\n\n'
+            '## Second section\n\nbar'
+        )
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body = response.content.decode()
+        self.assertIn('On this page', body)
+        self.assertIn('id="first-section"', body)
+        self.assertIn('id="second-section"', body)
+        # The TOC sidebar should NOT include the H1 — the title already
+        # renders in the post hero, including it again would be redundant.
+        self.assertNotIn('href="#page-title"', body)
+
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class PostDetailRecommendedPostsTests(TestCase):
