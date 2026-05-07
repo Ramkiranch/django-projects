@@ -547,8 +547,16 @@ a:not(.btn):not(.nav-link):not(.page-link):hover { text-decoration: underline; t
 .post-layout .post-toc .toc a:hover { color: var(--ink); text-decoration: none; }
 .post-layout .post-toc .toc a.is-active,
 .post-layout .post-toc .toc a.active { color: var(--ink); }
-.post-layout .post-main { min-width: 0; }
-.post-layout .post-rail-spacer { /* empty by design */ }
+/* Pin the article to grid column 2 always. Without this, when the
+   TOC aside isn't rendered (post has fewer than TOC_MIN_H2 H2s, or any
+   other reason show_toc is False), CSS Grid's auto-placement drops
+   .post-main into column 1 — the 200px TOC slot — squishing the
+   article into a narrow strip with the empty .post-rail-spacer
+   filling the wide middle column. With explicit grid-column: 2 the
+   article always sits where the prose belongs regardless of whether
+   the TOC is present. */
+.post-layout .post-main { min-width: 0; grid-column: 2; }
+.post-layout .post-rail-spacer { /* empty by design — column 3 */ }
 
 @media (max-width: 1080px) {
   .post-layout { grid-template-columns: 1fr; max-width: 720px; gap: 0; }
