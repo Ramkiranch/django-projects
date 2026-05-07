@@ -672,3 +672,24 @@ a:not(.btn):not(.nav-link):not(.page-link):hover { text-decoration: underline; t
   .subs-about-prominent { grid-template-columns: 1fr; padding: 40px 32px; gap: 32px; }
   .subs-about-prominent h2 { font-size: 1.6rem; }
 }
+
+/* Mermaid diagram block (rendered SVG injected by mermaid.js into .mermaid).
+   Pre-render the <pre class="mermaid"> source as a code-style block so the
+   page doesn't reflow violently when the SVG mounts. */
+.post-body pre.mermaid,
+.post-body .mermaid {
+  text-align: center;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 20px;
+  margin: 1.5em 0;
+  overflow-x: auto;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+.post-body .mermaid svg {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}

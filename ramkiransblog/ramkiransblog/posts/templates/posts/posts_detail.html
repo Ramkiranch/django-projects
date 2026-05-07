@@ -123,4 +123,37 @@
       })();
     </script>
   {% endif %}
+
+  {% if has_mermaid %}
+    {% comment %}
+      Mermaid diagram support — only loaded on posts that contain at
+      least one ```mermaid block (detected server-side in the view via
+      the `class="language-mermaid"` marker the markdown library emits).
+      Theme: 'neutral' to fit the warm-minimal palette. securityLevel:
+      'strict' sanitizes the rendered SVG.
+    {% endcomment %}
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+      // Convert <pre><code class="language-mermaid">...</code></pre> blocks
+      // (what python-markdown's fenced_code emits) into <pre class="mermaid">
+      // wrappers (what mermaid's auto-scanner expects).
+      document.querySelectorAll('code.language-mermaid').forEach(function (code) {
+        const pre = code.closest('pre');
+        if (!pre) return;
+        const wrapper = document.createElement('pre');
+        wrapper.className = 'mermaid';
+        wrapper.textContent = code.textContent;  // .textContent auto-decodes entities
+        pre.replaceWith(wrapper);
+      });
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'neutral',
+        securityLevel: 'strict',
+        fontFamily: 'Source Sans 3, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      });
+      await mermaid.run({ querySelector: '.mermaid' });
+    </script>
+  {% endif %}
 {% endblock %}

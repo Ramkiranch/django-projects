@@ -46,6 +46,13 @@ def post_details(request, post_id):
     h2_count = sum(1 for tok in md.toc_tokens if tok.get('level') == 2)
     show_toc = h2_count >= TOC_MIN_H2
 
+    # `extra` extension's fenced_code emits ```mermaid blocks as
+    # <pre><code class="language-mermaid">…</code></pre>. We detect that
+    # marker server-side and only load the Mermaid client library on
+    # posts that actually contain a diagram (saves ~600 KB on every
+    # other post-detail page view).
+    has_mermaid = 'class="language-mermaid"' in body_html
+
     recommended_posts = (
         Post.objects.exclude(pk=post.pk)
         .order_by('-pub_date')[:RECOMMENDED_COUNT]
@@ -59,6 +66,7 @@ def post_details(request, post_id):
             'body_html': body_html,
             'toc_html': md.toc if show_toc else '',
             'show_toc': show_toc,
+            'has_mermaid': has_mermaid,
             'recommended_posts': recommended_posts,
         },
     )

@@ -499,6 +499,65 @@ class RedesignSmokeTests(TestCase):
         self.assertIn('/subscribe/', body)
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class MermaidDiagramTests(TestCase):
+    """Mermaid client library is loaded only on posts that contain at
+    least one ```mermaid block — otherwise we don't pay the ~600 KB
+    download cost on every post-detail view."""
+
+    MERMAID_CDN = 'cdn.jsdelivr.net/npm/mermaid'
+
+    def _post_with_body(self, body: str) -> Post:
+        return Post.objects.create(
+            title='Diagram test',
+            pub_date=datetime(2026, 5, 1, tzinfo=timezone.utc),
+            image=SimpleUploadedFile('d.png', ONE_PIXEL_PNG, content_type='image/png'),
+            body=body,
+        )
+
+    def test_post_with_mermaid_block_loads_mermaid_lib(self):
+        body = (
+            "Some intro text.\n\n"
+            "```mermaid\n"
+            "graph TD;\n"
+            "  A-->B;\n"
+            "  A-->C;\n"
+            "```\n\n"
+            "Closing paragraph."
+        )
+        post = self._post_with_body(body)
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body_html = response.content.decode()
+        self.assertIn(self.MERMAID_CDN, body_html)
+        # The fenced_code marker that triggered the load
+        self.assertIn('class="language-mermaid"', body_html)
+
+    def test_post_without_mermaid_skips_mermaid_lib(self):
+        post = self._post_with_body(
+            "Just a normal post.\n\n```python\nprint('hi')\n```\n"
+        )
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body_html = response.content.decode()
+        self.assertNotIn(self.MERMAID_CDN, body_html)
+        self.assertNotIn('class="language-mermaid"', body_html)
+
+    def test_post_with_multiple_mermaid_blocks_loads_lib_once(self):
+        body = (
+            "```mermaid\nflowchart LR; A-->B\n```\n\n"
+            "Some text.\n\n"
+            "```mermaid\nsequenceDiagram; Alice->>Bob: Hi\n```\n"
+        )
+        post = self._post_with_body(body)
+        response = self.client.get(reverse('post_detail', args=[post.id]))
+        body_html = response.content.decode()
+        # Exactly one CDN script tag, even with two diagrams in the body
+        self.assertEqual(body_html.count(self.MERMAID_CDN), 1)
+        # Both diagram source bodies appear in the rendered HTML (mermaid will
+        # later swap each <pre> for an inline SVG client-side)
+        self.assertIn('flowchart LR', body_html)
+        self.assertIn('sequenceDiagram', body_html)
+
+
 class MarkdownFilterTests(TestCase):
     def test_strip_markdown_removes_syntax(self):
         from posts.templatetags.markdown_filters import strip_markdown
