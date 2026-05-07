@@ -571,6 +571,10 @@ a:not(.btn):not(.nav-link):not(.page-link):hover { text-decoration: underline; t
   font-family: var(--serif); font-size: 1.12rem; line-height: 1.78; color: var(--ink);
 }
 .post-body p { margin-bottom: 1.2em; }
+/* h1 in body falls through only if a leading-title-strip fails (i.e. the
+   author wrote an intentional second h1). Sized between hero h1 and h2
+   so it's clearly a section header, not a duplicate page title. */
+.post-body h1 { font-size: 2rem; margin-top: 1.8em; }
 .post-body h2 { font-size: 1.7rem; margin-top: 1.6em; }
 .post-body h3 { font-size: 1.3rem; margin-top: 1.4em; }
 .post-body blockquote {
