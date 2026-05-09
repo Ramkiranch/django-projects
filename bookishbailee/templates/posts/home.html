@@ -76,43 +76,28 @@
 
     <aside class="feature-grid__aside">
       <div class="feature-grid__aside-sticky">
-        <div class="eyebrow">On the shelf</div>
-        <ol class="bookshelf">
-          <li class="bookshelf__item">
-            <span class="bookshelf__num">1</span>
-            <div>
-              <div class="bookshelf__title">Demon Copperhead</div>
-              <div class="bookshelf__author">Barbara Kingsolver</div>
-            </div>
-          </li>
-          <li class="bookshelf__item">
-            <span class="bookshelf__num">2</span>
-            <div>
-              <div class="bookshelf__title">The Body Keeps the Score</div>
-              <div class="bookshelf__author">Bessel van der Kolk</div>
-            </div>
-          </li>
-          <li class="bookshelf__item">
-            <span class="bookshelf__num">3</span>
-            <div>
-              <div class="bookshelf__title">Hunt, Gather, Parent</div>
-              <div class="bookshelf__author">Michaeleen Doucleff</div>
-            </div>
-          </li>
-          <li class="bookshelf__item">
-            <span class="bookshelf__num">4</span>
-            <div>
-              <div class="bookshelf__title">Tom Lake</div>
-              <div class="bookshelf__author">Ann Patchett</div>
-            </div>
-          </li>
-        </ol>
+        {% if bookshelf %}
+          <div class="eyebrow">On the shelf</div>
+          <ol class="bookshelf">
+            {% for b in bookshelf %}
+              <li class="bookshelf__item">
+                <span class="bookshelf__num">{{ forloop.counter }}</span>
+                <div>
+                  <div class="bookshelf__title">{{ b.title }}</div>
+                  {% if b.author %}<div class="bookshelf__author">{{ b.author }}</div>{% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ol>
+        {% endif %}
 
-        <div class="right-now">
-          <div class="right-now__tab">Right now</div>
-          <div class="hand-note hand-note--accent">currently re-reading</div>
-          <p><em>Gilead</em>, in ten-page increments before bed.</p>
-        </div>
+        {% if right_now %}
+          <div class="right-now">
+            <div class="right-now__tab">Right now</div>
+            {% if right_now.label %}<div class="hand-note hand-note--accent">{{ right_now.label }}</div>{% endif %}
+            <p><em>{{ right_now.book_title }}</em>{% if right_now.note %}, {{ right_now.note }}{% endif %}</p>
+          </div>
+        {% endif %}
       </div>
     </aside>
   </section>
