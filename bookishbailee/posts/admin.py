@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Category, Post, Tag, WebConfig
+from .models import BookshelfEntry, Category, Post, RightNowFeature, Tag, WebConfig
 
 
 @admin.register(WebConfig)
@@ -63,3 +63,28 @@ class PostAdmin(admin.ModelAdmin):
             '<img src="{}" style="max-height:160px; border:1px solid #ccc;">',
             obj.image.url,
         )
+
+
+@admin.register(BookshelfEntry)
+class BookshelfEntryAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'order', 'updated_at')
+    list_editable = ('order',)
+    search_fields = ('title', 'author')
+    ordering = ('order', 'title')
+
+
+@admin.register(RightNowFeature)
+class RightNowFeatureAdmin(admin.ModelAdmin):
+    list_display = ('book_title', 'label', 'updated_at')
+    fieldsets = (
+        (None, {'fields': ('book_title', 'note', 'label')}),
+        ('Meta', {'fields': ('updated_at',), 'classes': ('collapse',)}),
+    )
+    readonly_fields = ('updated_at',)
+
+    def has_add_permission(self, request):
+        # Singleton — block "Add" once the row exists.
+        return not RightNowFeature.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False

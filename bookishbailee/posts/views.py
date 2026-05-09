@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
 
-from .models import Category, Post, Tag
+from .models import BookshelfEntry, Category, Post, RightNowFeature, Tag
 
 POSTS_PER_PAGE = 9
 
@@ -19,6 +19,14 @@ def home(request):
     index_strip = others[:3]
     recent = others[3:6] if len(others) >= 6 else others[:3]
 
+    # Sidebar (cap at 4 per design hand-off). RightNowFeature is a singleton;
+    # filter out the empty-state row so the template doesn't render a
+    # half-blank "Right now" callout.
+    bookshelf = list(BookshelfEntry.objects.all()[:4])
+    right_now = (
+        RightNowFeature.objects.filter(pk=1).exclude(book_title='').first()
+    )
+
     return render(
         request,
         'posts/home.html',
@@ -26,6 +34,8 @@ def home(request):
             'featured': featured,
             'index_strip': index_strip,
             'recent': recent,
+            'bookshelf': bookshelf,
+            'right_now': right_now,
         },
     )
 
