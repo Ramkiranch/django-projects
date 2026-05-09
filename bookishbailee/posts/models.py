@@ -141,3 +141,61 @@ class Post(models.Model):
 
         words = len(strip_markdown(self.body or '').split())
         return max(1, round(words / 220))
+
+
+class BookshelfEntry(models.Model):
+    """A book on the home-page sidebar shelf.
+
+    Curated by hand from the admin. Ordered by `order` then title;
+    the home view caps display at 4 to match the Modern Botanical
+    design hand-off.
+    """
+
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=120, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = 'bookshelf entries'
+        ordering = ('order', 'title')
+
+    def __str__(self):
+        return self.title
+
+
+class RightNowFeature(models.Model):
+    """Singleton — the "Right now" callout under the bookshelf.
+
+    Always uses pk=1; `save()` forces it. A freshly-migrated install
+    starts with no row at all; admin shows an "Add" button until the
+    editor creates the singleton, after which `has_add_permission`
+    blocks creating a second one. The home view also hides the block
+    when `book_title` is blank, so emptying the field is a soft hide.
+    """
+
+    book_title = models.CharField(max_length=200, blank=True)
+    note = models.CharField(max_length=280, blank=True)
+    label = models.CharField(max_length=120, default='currently re-reading')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Right Now feature'
+        verbose_name_plural = 'Right Now feature'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Singleton — clear fields via the change form instead.
+        return None
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return self.book_title or '(empty)'
