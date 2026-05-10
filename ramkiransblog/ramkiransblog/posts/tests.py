@@ -16,12 +16,16 @@ ONE_PIXEL_PNG = (
 )
 
 
-def make_post(idx=0):
+def make_post(idx=0, category=Post.CATEGORY_TECH, title=None):
+    """Test helper. Defaults to category='tech' so existing tests
+    (which all assert behavior for tech-only posts on the home page)
+    keep passing without per-call edits."""
     return Post.objects.create(
-        title=f'Post {idx}',
+        title=title or f'Post {idx}',
         pub_date=datetime(2026, 1, 1, tzinfo=timezone.utc) + timedelta(days=idx),
         image=SimpleUploadedFile(f'post-{idx}.png', ONE_PIXEL_PNG, content_type='image/png'),
         body=f'Body of post {idx}.',
+        category=category,
     )
 
 
@@ -676,3 +680,125 @@ class MarkdownFilterTests(TestCase):
         self.assertIn('link', cleaned)
         self.assertIn('alt', cleaned)
         self.assertIn('quoted', cleaned)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class CategoryFilteringTests(TestCase):
+    """Each listing page (/, /personal/, /leadership/) shows only posts
+    in its own category. The home page is no longer a global feed; it's
+    the tech feed."""
+
+    def setUp(self):
+        # One post per category, distinct titles for assertions.
+        self.tech = make_post(idx=1, category=Post.CATEGORY_TECH, title='TechAlpha')
+        self.personal = make_post(idx=2, category=Post.CATEGORY_PERSONAL, title='PersonalBeta')
+        self.leadership = make_post(idx=3, category=Post.CATEGORY_LEADERSHIP, title='LeadershipGamma')
+
+    def test_home_shows_only_tech_posts(self):
+        body = self.client.get(reverse('home')).content.decode()
+        self.assertIn('TechAlpha', body)
+        self.assertNotIn('PersonalBeta', body)
+        self.assertNotIn('LeadershipGamma', body)
+
+    def test_personal_page_returns_200(self):
+        response = self.client.get(reverse('personal'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'posts/personal.html')
+
+    def test_personal_page_shows_only_personal_posts(self):
+        body = self.client.get(reverse('personal')).content.decode()
+        self.assertIn('PersonalBeta', body)
+        self.assertNotIn('TechAlpha', body)
+        self.assertNotIn('LeadershipGamma', body)
+
+    def test_leadership_page_returns_200(self):
+        response = self.client.get(reverse('leadership'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'posts/leadership.html')
+
+    def test_leadership_page_shows_only_leadership_posts(self):
+        body = self.client.get(reverse('leadership')).content.decode()
+        self.assertIn('LeadershipGamma', body)
+        self.assertNotIn('TechAlpha', body)
+        self.assertNotIn('PersonalBeta', body)
+
+    def test_personal_page_renders_personal_hero_copy(self):
+        body = self.client.get(reverse('personal')).content.decode()
+        # The view passes a hero dict with this kicker — guards against
+        # an accidental copy/paste of the home hero into personal.html.
+        self.assertIn('Off the clock', body)
+        self.assertIn('Personal essays', body)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class RecommendationCategoryTests(TestCase):
+    """The 'More from the blog' rail prefers same-category posts; falls
+    back to any-category to top up to 3 cards when the same category
+    doesn't have enough."""
+
+    def _recs_section(self, body: str) -> str:
+        idx = body.find('More from the blog')
+        self.assertGreater(idx, 0, "'More from the blog' header not found")
+        return body[idx:]
+
+    def test_recommendations_are_same_category_when_enough_exist(self):
+        # 4 tech + 1 personal; viewing a tech post must yield 3 tech recs,
+        # and the personal post must NOT appear in the recommendations.
+        tech_posts = [
+            make_post(idx=i, category=Post.CATEGORY_TECH, title=f'TechPost{i}')
+            for i in range(4)
+        ]
+        make_post(idx=99, category=Post.CATEGORY_PERSONAL, title='PersonalIntruder')
+        target = tech_posts[0]
+        body = self.client.get(reverse('post_detail', args=[target.id])).content.decode()
+        recs = self._recs_section(body)
+        self.assertNotIn('PersonalIntruder', recs)
+        # 3 most-recent OTHER tech posts (idx 3, 2, 1) are the recommendations
+        for visible in ('TechPost3', 'TechPost2', 'TechPost1'):
+            self.assertIn(visible, recs)
+
+    def test_recommendations_fall_back_to_other_categories_when_short(self):
+        # 1 personal (the post we're viewing) + 3 tech. No other personal
+        # exists, so the 3 tech posts must fill the rail as fallback.
+        tech_posts = [
+            make_post(idx=i, category=Post.CATEGORY_TECH, title=f'TechFallback{i}')
+            for i in range(3)
+        ]
+        personal = make_post(
+            idx=99, category=Post.CATEGORY_PERSONAL, title='LonelyPersonal'
+        )
+        body = self.client.get(reverse('post_detail', args=[personal.id])).content.decode()
+        recs = self._recs_section(body)
+        for tp in tech_posts:
+            self.assertIn(tp.title, recs)
+
+    def test_recommendations_top_up_with_other_categories_when_partial(self):
+        # 2 personal + 2 tech. Viewing one personal: 1 other personal
+        # (same category) + 2 tech (fallback top-up) = 3 cards.
+        p1 = make_post(idx=1, category=Post.CATEGORY_PERSONAL, title='PersonalA')
+        make_post(idx=2, category=Post.CATEGORY_PERSONAL, title='PersonalB')
+        make_post(idx=3, category=Post.CATEGORY_TECH, title='TechFiller1')
+        make_post(idx=4, category=Post.CATEGORY_TECH, title='TechFiller2')
+        body = self.client.get(reverse('post_detail', args=[p1.id])).content.decode()
+        recs = self._recs_section(body)
+        self.assertIn('PersonalB', recs)
+        self.assertIn('TechFiller1', recs)
+        self.assertIn('TechFiller2', recs)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class CategoryNavigationTests(TestCase):
+    """Header nav got a restructure: Twitter dropped, Personal/Leadership
+    added. Footer dropped Twitter and Facebook. These tests pin the
+    new shape so an accidental revert gets caught."""
+
+    def test_header_nav_includes_personal_and_leadership_links(self):
+        body = self.client.get(reverse('home')).content.decode()
+        self.assertIn(f'href="{reverse("personal")}"', body)
+        self.assertIn(f'href="{reverse("leadership")}"', body)
+
+    def test_header_nav_no_longer_includes_twitter(self):
+        body = self.client.get(reverse('home')).content.decode()
+        # Twitter link should be gone from header nav AND footer
+        self.assertNotIn('twitter.com/kinnu007', body)
+        self.assertNotIn('facebook.com/ramkiran007', body)

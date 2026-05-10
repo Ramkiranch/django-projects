@@ -29,14 +29,15 @@ PLATFORMS = [
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'pub_date')
+    list_display = ('title', 'category', 'pub_date')
+    list_filter = ('category',)
     date_hierarchy = 'pub_date'
     search_fields = ('title', 'body')
     readonly_fields = ('share_urls',)
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'pub_date', 'image', 'body'),
+            'fields': ('title', 'category', 'pub_date', 'image', 'body'),
         }),
         ('Share URLs (UTM-tagged for source attribution)', {
             'fields': ('share_urls',),
