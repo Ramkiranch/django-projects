@@ -1,0 +1,55 @@
+{% comment %}
+  Shared post-listing block used by every category page (home / personal
+  / leadership). Renders the section header (label from the view's `hero`
+  context dict, falls back to "Latest posts"), the post-card loop, the
+  empty state, and the pagination control. Pagination uses Bootstrap
+  classes — kept as-is from the original home.html.
+{% endcomment %}
+<section>
+  <div class="posts-header">
+    <h2>{{ hero.section_label|default:"Latest posts" }}</h2>
+    {% if page_obj.paginator.count %}
+      <span class="posts-count">
+        {{ page_obj.paginator.count }} post{{ page_obj.paginator.count|pluralize }}
+      </span>
+    {% endif %}
+  </div>
+
+  {% if page_obj %}
+    {% for post in page_obj %}
+      {% include "posts/_post_card.html" with post=post %}
+    {% endfor %}
+  {% else %}
+    <p style="color: var(--muted);">No posts yet — check back soon.</p>
+  {% endif %}
+
+  {% if page_obj.paginator.num_pages > 1 %}
+    <nav aria-label="Posts pagination" style="margin-top: 48px;">
+      <ul class="pagination justify-content-center">
+        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+          <a class="page-link"
+             href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% else %}#{% endif %}"
+             aria-label="Previous">&laquo;</a>
+        </li>
+
+        {% for num in elided_range %}
+          {% if num == page_obj.paginator.ELLIPSIS %}
+            <li class="page-item disabled"><span class="page-link">{{ num }}</span></li>
+          {% elif num == page_obj.number %}
+            <li class="page-item active" aria-current="page">
+              <span class="page-link">{{ num }}</span>
+            </li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+
+        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+          <a class="page-link"
+             href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% else %}#{% endif %}"
+             aria-label="Next">&raquo;</a>
+        </li>
+      </ul>
+    </nav>
+  {% endif %}
+</section>

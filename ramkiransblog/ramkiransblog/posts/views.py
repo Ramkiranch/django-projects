@@ -55,8 +55,15 @@ def _strip_leading_title_h1(body_html: str, title: str) -> str:
     return body_html
 
 
-def home(request):
-    posts_qs = Post.objects.order_by('-pub_date')
+def _render_listing(request, *, template, category, hero):
+    """Shared listing-page renderer used by home / personal / leadership.
+
+    Each public listing view fetches posts for one category, paginates
+    them at POSTS_PER_PAGE, and passes a `hero` dict (kicker / h1 /
+    intro / section_label) to the template so the same layout can wear
+    different copy per page.
+    """
+    posts_qs = Post.objects.filter(category=category).order_by('-pub_date')
     paginator = Paginator(posts_qs, POSTS_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get('page'))
     elided_range = paginator.get_elided_page_range(
@@ -64,8 +71,64 @@ def home(request):
     )
     return render(
         request,
-        'posts/home.html',
-        {'page_obj': page_obj, 'elided_range': elided_range},
+        template,
+        {
+            'page_obj': page_obj,
+            'elided_range': elided_range,
+            'hero': hero,
+        },
+    )
+
+
+def home(request):
+    return _render_listing(
+        request,
+        template='posts/home.html',
+        category=Post.CATEGORY_TECH,
+        hero={
+            'kicker': 'Engineering leadership · AI · the long game',
+            'h1': 'Notes from a fintech EM building in the AI shift.',
+            'intro': (
+                'By Ram Chevendra — Senior Software Engineering Manager. '
+                'I write about engineering leadership, agentic AI in the '
+                'enterprise, and the craft of staying technical as a leader.'
+            ),
+            'section_label': 'Latest posts',
+        },
+    )
+
+
+def personal(request):
+    return _render_listing(
+        request,
+        template='posts/personal.html',
+        category=Post.CATEGORY_PERSONAL,
+        hero={
+            'kicker': 'Off the clock · life · the longer view',
+            'h1': 'Personal essays.',
+            'intro': (
+                "Notes outside the day job — books, family, reflections, "
+                "and things that don't fit anywhere else."
+            ),
+            'section_label': 'Personal essays',
+        },
+    )
+
+
+def leadership(request):
+    return _render_listing(
+        request,
+        template='posts/leadership.html',
+        category=Post.CATEGORY_LEADERSHIP,
+        hero={
+            'kicker': 'Management · teams · the craft',
+            'h1': 'On engineering leadership.',
+            'intro': (
+                "What I've learned managing engineers, building teams, "
+                "and balancing strategy with shipping."
+            ),
+            'section_label': 'Leadership posts',
+        },
     )
 
 
@@ -102,10 +165,19 @@ def post_details(request, post_id):
     # other post-detail page view).
     has_mermaid = 'class="language-mermaid"' in body_html
 
-    recommended_posts = (
-        Post.objects.exclude(pk=post.pk)
-        .order_by('-pub_date')[:RECOMMENDED_COUNT]
-    )
+    # Recommend posts from the same category first (more relevant).
+    # If fewer than RECOMMENDED_COUNT same-category posts exist (common
+    # for /personal/ and /leadership/ which start with 1 post each),
+    # top up from any other category so the rail still shows 3 cards.
+    same_cat = Post.objects.filter(category=post.category).exclude(pk=post.pk)
+    recommended_posts = list(same_cat.order_by('-pub_date')[:RECOMMENDED_COUNT])
+    if len(recommended_posts) < RECOMMENDED_COUNT:
+        seen = {p.pk for p in recommended_posts} | {post.pk}
+        extras = (
+            Post.objects.exclude(pk__in=seen)
+            .order_by('-pub_date')[:RECOMMENDED_COUNT - len(recommended_posts)]
+        )
+        recommended_posts.extend(extras)
 
     return render(
         request,

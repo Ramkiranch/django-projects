@@ -26,6 +26,8 @@ sitemaps = {
 urlpatterns = [
     path(env('DJANGO_ADMIN_URL', default='rk-admin/'), admin.site.urls),
     path('', posts.views.home, name='home'),
+    path('personal/', posts.views.personal, name='personal'),
+    path('leadership/', posts.views.leadership, name='leadership'),
     path('posts/<int:post_id>/', posts.views.post_details, name='post_detail'),
     path('about/', sitepages.views.about, name='about'),
 
