@@ -705,3 +705,75 @@ a:not(.btn):not(.nav-link):not(.page-link):hover { text-decoration: underline; t
   height: auto;
   display: inline-block;
 }
+
+/* ============================================
+   Discover-other-sections strip — homepage only
+   Two side-by-side cards linking to /leadership/ and /personal/.
+   Sits between the post list and the email-signup footer so a
+   reader who finishes the tech feed has a clear path to the
+   other categories without relying on the small header nav.
+   ============================================ */
+.discover {
+  margin: 64px 0 24px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+.discover-header {
+  margin: 0 0 24px;
+}
+.discover-header h2 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+.discover-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.discover-card {
+  display: block;
+  padding: 28px 28px 24px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.discover-card:hover,
+.discover-card:focus {
+  border-color: var(--ink);
+  text-decoration: none;
+  color: var(--ink);
+  transform: translateY(-2px);
+}
+.discover-card .discover-kicker {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  margin: 0 0 10px;
+}
+.discover-card h3 {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  margin: 0 0 10px;
+  line-height: 1.3;
+}
+.discover-card p {
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+.discover-card .discover-arrow {
+  display: inline-block;
+  font-size: 0.92rem;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .discover-grid { grid-template-columns: 1fr; }
+}
