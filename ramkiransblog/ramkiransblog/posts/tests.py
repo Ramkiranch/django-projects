@@ -802,3 +802,41 @@ class CategoryNavigationTests(TestCase):
         # Twitter link should be gone from header nav AND footer
         self.assertNotIn('twitter.com/kinnu007', body)
         self.assertNotIn('facebook.com/ramkiran007', body)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class DiscoverSectionTests(TestCase):
+    """The 'Explore other writing' strip on / cross-promotes the
+    leadership and personal feeds. It should appear ONLY on the home
+    page (not on /personal/ or /leadership/), and it should appear
+    AFTER the post list so readers see it once they've finished
+    scanning the tech feed."""
+
+    def test_home_renders_discover_section(self):
+        body = self.client.get(reverse('home')).content.decode()
+        self.assertIn('class="discover"', body)
+        self.assertIn('Explore other writing', body)
+        # Both cards link to the new pages
+        self.assertIn(f'href="{reverse("leadership")}"', body)
+        self.assertIn(f'href="{reverse("personal")}"', body)
+
+    def test_discover_section_appears_after_post_list(self):
+        # Order matters: post list first, discover-other-sections after,
+        # then the email signup in base.html.
+        make_post(idx=1, category=Post.CATEGORY_TECH, title='OrderTest')
+        body = self.client.get(reverse('home')).content.decode()
+        post_card_idx = body.find('class="post-card"')
+        discover_idx = body.find('class="discover"')
+        self.assertGreater(post_card_idx, 0)
+        self.assertGreater(discover_idx, post_card_idx,
+            'Discover section must render after the post list')
+
+    def test_personal_page_does_not_render_discover_section(self):
+        body = self.client.get(reverse('personal')).content.decode()
+        self.assertNotIn('class="discover"', body)
+        self.assertNotIn('Explore other writing', body)
+
+    def test_leadership_page_does_not_render_discover_section(self):
+        body = self.client.get(reverse('leadership')).content.decode()
+        self.assertNotIn('class="discover"', body)
+        self.assertNotIn('Explore other writing', body)

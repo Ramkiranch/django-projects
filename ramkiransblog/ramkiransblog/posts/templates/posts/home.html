@@ -21,4 +21,27 @@
   </section>
 
   {% include "posts/_post_list.html" %}
+
+  {# Discover other sections — homepage only. Cross-promotes the leadership #}
+  {# and personal feeds to readers who'd otherwise need to spot the small #}
+  {# nav links at the top to find them. #}
+  <section class="discover" aria-labelledby="discover-heading">
+    <div class="discover-header">
+      <h2 id="discover-heading">Explore other writing</h2>
+    </div>
+    <div class="discover-grid">
+      <a class="discover-card" href="{% url 'leadership' %}">
+        <p class="discover-kicker">Management &middot; teams &middot; the craft</p>
+        <h3>Leadership</h3>
+        <p>What I&rsquo;ve learned managing engineers, building teams, and balancing strategy with shipping.</p>
+        <span class="discover-arrow">Read leadership posts &rarr;</span>
+      </a>
+      <a class="discover-card" href="{% url 'personal' %}">
+        <p class="discover-kicker">Off the clock &middot; life &middot; the longer view</p>
+        <h3>Personal</h3>
+        <p>Notes outside the day job &mdash; books, family, reflections, and things that don&rsquo;t fit anywhere else.</p>
+        <span class="discover-arrow">Read personal essays &rarr;</span>
+      </a>
+    </div>
+  </section>
 {% endblock %}
